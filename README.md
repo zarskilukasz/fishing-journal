@@ -8,7 +8,7 @@
 [![Package Manager](https://img.shields.io/badge/pnpm-recommended-f69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![License](https://img.shields.io/badge/License-Unlicensed-lightgrey)](#8-license)
 
-A private, offline-first PWA for logging fishing trips, catches, gear, and weather snapshots for later analysis.
+A private, online-first PWA for logging fishing trips, catches, gear, and weather snapshots for later analysis.
 
 ## Table of Contents
 
@@ -34,7 +34,7 @@ Fishing Journal is a private MVP Progressive Web App (PWA) for a single user. It
 - **Gear** (rods/baits/groundbaits with historical “snapshots”)
 - **Weather** (automatic snapshots for recent trips, stored permanently for future analysis)
 
-The product is designed to be **responsive (mobile + desktop)** and **offline-first**, so it remains usable near the water without reliable connectivity.
+The product is designed to be **responsive (mobile + desktop)** and **online-first**, so it remains usable near the water without reliable connectivity.
 
 Additional internal docs:
 - PRD: `./.ai/prd.md`
@@ -113,7 +113,7 @@ All scripts are defined in `package.json`:
 - **Trip management**
   - Create a trip with default “now” timestamp and GPS-based location
   - Edit trip duration (start/stop)
-  - Offline-first: save locally and sync to Supabase when back online
+  - Online-first: save locally and sync to Supabase when back online
 - **Weather module (AccuWeather integration)**
   - Auto-fetch for trips within the last 24h
   - Store weather snapshots permanently (no overwrites)

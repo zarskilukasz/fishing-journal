@@ -22,8 +22,6 @@ Logowanie: Uproszczone (jeden użytkownik lub prosta autoryzacja bez odzyskiwani
 
 <matched_recommendations>
 
-Tryb Offline-first: Aplikacja pozwoli na zapis danych bez dostępu do sieci (synchronizacja później). W trybie offline mapa będzie ukryta/zastąpiona komunikatem, a współrzędne pobrane z urządzenia.
-
 Struktura danych sprzętu: Zastosowanie archiwizacji/snapshotów nazw sprzętu w historii wypraw (zmiana nazwy wędki w bazie nie zmienia jej nazwy w starych wyprawach).
 
 Słowniki: Zastosowanie predefiniowanej listy gatunków ryb (dropdown) zamiast ręcznego wpisywania, aby zapewnić spójność statystyk.
@@ -60,8 +58,6 @@ c. Ważne kryteria sukcesu i sposoby ich mierzenia
 Czas zapisu: Możliwość utworzenia kompletnego wpisu (wyprawa + 1 ryba + zdjęcie) w czasie poniżej 2 minut w warunkach polowych.
 
 Niezawodność danych: 100% poprawnie wyświetlonych danych historycznych (pogoda i nazwy sprzętu) po upływie 7 dni od zapisu (weryfikacja mechanizmu snapshotów).
-
-Użyteczność offline: Skuteczne zapisanie wpisu przy braku zasięgu i automatyczna synchronizacja po odzyskaniu połączenia (brak utraty danych).
 
 d. Nierozwiązane kwestie lub obszary wymagające wyjaśnienia
 Brak istotnych nierozwiązanych kwestii blokujących powstanie PRD. </prd_planning_summary>

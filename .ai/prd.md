@@ -1,7 +1,7 @@
 # Dokument wymagań produktu (PRD) - Dziennik Wędkarski MVP
 
 ## 1. Przegląd produktu
-Dziennik Wędkarski to aplikacja typu Progressive Web App (PWA), stworzona jako prywatne narzędzie MVP (Minimum Viable Product). Głównym celem aplikacji jest umożliwienie wędkarzowi rejestrowania wypraw, złowionych ryb oraz używanego sprzętu, przy jednoczesnym automatycznym pobieraniu i archiwizowaniu danych pogodowych. System ma służyć jako osobista baza wiedzy. Aplikacja jest w pełni responsywna (RWD), zapewniając poprawne wyświetlanie i użyteczność zarówno na smartfonach, jak i komputerach stacjonarnych, działa w modelu offline-first i wykorzystuje technologie Supabase, Tailwind CSS oraz Shadcn UI.
+Dziennik Wędkarski to aplikacja typu Progressive Web App (PWA), stworzona jako prywatne narzędzie MVP (Minimum Viable Product). Głównym celem aplikacji jest umożliwienie wędkarzowi rejestrowania wypraw, złowionych ryb oraz używanego sprzętu, przy jednoczesnym automatycznym pobieraniu i archiwizowaniu danych pogodowych. System ma służyć jako osobista baza wiedzy. Aplikacja jest w pełni responsywna (RWD), zapewniając poprawne wyświetlanie i użyteczność zarówno na smartfonach, jak i komputerach stacjonarnych, działa w modelu online-first i wykorzystuje technologie Supabase, Tailwind CSS oraz Shadcn UI.
 
 ## 2. Problem użytkownika
 Wędkarze często mają trudność z powiązaniem swoich wyników (lub ich braku) z konkretnymi warunkami pogodowymi i użytym sprzętem po upływie czasu. Pamięć jest zawodna, a papierowe notatki są niepraktyczne nad wodą i trudne do analizy.
@@ -28,7 +28,6 @@ Główne problemy to:
 - Tworzenie nowej wyprawy z automatycznym pobraniem lokalizacji (GPS) i daty/czasu.
 - Integracja z Google Maps API do wizualizacji i edycji lokalizacji.
 - Możliwość edycji czasu trwania wyprawy (start/stop).
-- Obsługa trybu offline: zapis danych lokalnie i synchronizacja z Supabase po odzyskaniu połączenia.
 
 ### Moduł pogodowy (Integracja AccuWeather)
 - Automatyczne pobieranie danych pogodowych dla wypraw z ostatnich 24h.
@@ -100,29 +99,22 @@ Kryteria akceptacji:
 1. Kliknięcie FAB tworzy szkic wyprawy z datą "teraz" i lokalizacją GPS.
 2. Sprzęt podstawia się z ostatniej wyprawy.
 
-ID: US-004
-Tytuł: Zapis wyprawy Offline
-Opis: Jako użytkownik chcę zapisywać dane bez internetu.
-Kryteria akceptacji:
-1. Zapis działa bez sieci (LocalStorage).
-2. Synchronizacja następuje po powrocie online.
-
 ### Pogoda
-ID: US-005
+ID: US-004
 Tytuł: Automatyczne pobieranie pogody
 Opis: Jako użytkownik chcę automatyczną pogodę dla wypraw <24h.
 Kryteria akceptacji:
 1. Dla wypraw <24h system pobiera dane z AccuWeather.
 2. Dane (temp, wiatr, ciśnienie) zapisują się w bazie i nie są nadpisywane.
 
-ID: US-006
+ID: US-005
 Tytuł: Ręczne uzupełnianie pogody
 Opis: Jako użytkownik chcę móc wpisać pogodę ręcznie dla starych wypraw.
 Kryteria akceptacji:
 1. Dla wypraw >24h pola pogody są edytowalne i opcjonalne.
 
 ### Rejestracja połowów
-ID: US-007
+ID: US-006
 Tytuł: Dodanie złowionej ryby (Trofeum)
 Opis: Jako użytkownik chcę dodać informację o złowionej rybie, wskazując na co została złowiona, ale nie musząc wypełniać wszystkich szczegółów.
 Kryteria akceptacji:
@@ -133,7 +125,7 @@ Kryteria akceptacji:
 5. Godzina połowu ustawia się domyślnie na aktualną (edytowalna).
 
 ### Przeglądanie i Analiza
-ID: US-008
+ID: US-007
 Tytuł: Przegląd historii wypraw
 Opis: Jako użytkownik chcę analizować swoje wyprawy.
 Kryteria akceptacji:
@@ -146,5 +138,4 @@ Dla MVP weryfikacja sukcesu opiera się na użyteczności dla pojedynczego użyt
 
 1. Czas zapisu kompletnego wpisu (Wyprawa + 1 Ryba [tylko wymagane pola]) w warunkach polowych wynosi poniżej 90 sekund.
 2. 100% poprawności wyświetlania danych historycznych po upływie 7 dni.
-3. Skuteczna synchronizacja danych offline bez utraty informacji.
-4. Poprawne renderowanie interfejsu (brak rozjechanych elementów) na testowanych rozdzielczościach: Mobile (360px+) i Desktop (1920px).
+3. Poprawne renderowanie interfejsu (brak rozjechanych elementów) na testowanych rozdzielczościach: Mobile (360px+) i Desktop (1920px).

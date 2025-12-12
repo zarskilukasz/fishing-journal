@@ -21,12 +21,6 @@
 - **Adapter**: `@astrojs/node` (uruchamianie Astro na Node)
 - **SEO**: `@astrojs/sitemap`
 
-## Offline-first / PWA (wymaganie z PRD)
-
-- **Tryb działania**: offline-first (MVP: zapis lokalny + synchronizacja po odzyskaniu połączenia)
-- **Magazyn lokalny (MVP)**: LocalStorage (wg PRD)
-- **Synchronizacja**: docelowo do Supabase po powrocie online
-
 ## Integracje zewnętrzne (planowane wg PRD)
 
 - **Pogoda**: AccuWeather API (pobieranie danych do 24h wstecz + snapshoty w bazie)
