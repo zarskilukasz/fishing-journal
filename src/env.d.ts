@@ -4,7 +4,10 @@ interface ImportMetaEnv {
   readonly SUPABASE_URL: string;
   readonly SUPABASE_KEY: string;
   readonly OPENROUTER_API_KEY: string;
-  // more env variables...
+  /** AccuWeather API key for weather data fetching */
+  readonly ACCUWEATHER_API_KEY: string;
+  /** AccuWeather base URL (optional, defaults to production) */
+  readonly ACCUWEATHER_BASE_URL?: string;
 }
 
 interface ImportMeta {

@@ -54,9 +54,7 @@ export const lastUsedEquipmentService = {
       .maybeSingle();
 
     if (tripError) {
-      console.error("Error fetching last trip:", tripError);
-      const mapped = mapSupabaseError(tripError);
-      return { data: null, error: mapped };
+      return { data: null, error: mapSupabaseError(tripError) };
     }
 
     // No trips found for the user
@@ -81,17 +79,14 @@ export const lastUsedEquipmentService = {
     ]);
 
     // 3. Check for errors in equipment queries
-    if (rodsResult.error || luresResult.error || groundbaitsResult.error) {
-      console.error("Error fetching equipment:", {
-        rods: rodsResult.error,
-        lures: luresResult.error,
-        groundbaits: groundbaitsResult.error,
-      });
-
-      // Map the first error encountered
-      const firstError = rodsResult.error || luresResult.error || groundbaitsResult.error;
-      const mapped = mapSupabaseError(firstError!);
-      return { data: null, error: mapped };
+    if (rodsResult.error) {
+      return { data: null, error: mapSupabaseError(rodsResult.error) };
+    }
+    if (luresResult.error) {
+      return { data: null, error: mapSupabaseError(luresResult.error) };
+    }
+    if (groundbaitsResult.error) {
+      return { data: null, error: mapSupabaseError(groundbaitsResult.error) };
     }
 
     // 4. Build and return the response
@@ -106,4 +101,3 @@ export const lastUsedEquipmentService = {
     };
   },
 };
-

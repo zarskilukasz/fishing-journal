@@ -363,6 +363,16 @@ export interface CatchPhotoDownloadUrlResponseDto {
   expires_in: number;
 }
 
+/**
+ * Response DTO for POST /catches/{id}/photo (server-side processing with Sharp).
+ */
+export interface CatchPhotoUploadResponseDto {
+  photo_path: string;
+  size_bytes: number;
+  width: number;
+  height: number;
+}
+
 // 2.8 Weather
 
 export type WeatherSnapshotDto = WeatherSnapshotRow;

@@ -1,14 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { lastUsedEquipmentService } from "./last-used-equipment.service";
 import type { SupabaseClient } from "@/db/supabase.client";
 
 /**
  * Mock query builder that simulates Supabase query chain
  */
-function createMockQueryBuilder(options: {
-  data?: unknown;
-  error?: { message: string; code: string } | null;
-}) {
+function createMockQueryBuilder(options: { data?: unknown; error?: { message: string; code: string } | null }) {
   const builder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
@@ -64,7 +61,6 @@ describe("lastUsedEquipmentService", () => {
       const mockGroundbaits = [{ groundbait_id: "gb-1", groundbait_name_snapshot: "Method Mix" }];
 
       // Track which table is being queried
-      let callIndex = 0;
       const fromMock = vi.fn().mockImplementation((table: string) => {
         if (table === "trips") {
           return createMockQueryBuilder({ data: { id: tripId } });
@@ -190,7 +186,7 @@ describe("lastUsedEquipmentService", () => {
 
     it("queries equipment tables with correct trip_id filter", async () => {
       const tripId = "trip-uuid-123";
-      const eqCalls: Array<{ table: string; args: unknown[] }> = [];
+      const eqCalls: { table: string; args: unknown[] }[] = [];
 
       const fromMock = vi.fn().mockImplementation((table: string) => {
         const builder = createMockQueryBuilder({
@@ -226,4 +222,3 @@ describe("lastUsedEquipmentService", () => {
     });
   });
 });
-

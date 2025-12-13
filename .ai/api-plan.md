@@ -8,7 +8,9 @@ This document defines a versioned REST API for the **Fishing Journal MVP** built
 - Endpoints live under Astro routes: `src/pages/api/v1/**` and are deployed with the Node adapter.
 - Soft-delete is the default for user equipment and trips (DB has `deleted_at`). The API exposes `DELETE` but implements it as **soft-delete** (sets `deleted_at`) unless explicitly stated otherwise.
 - Weather provider (AccuWeather) calls are implemented server-side; the API stores immutable snapshots in DB (`weather_snapshots` + `weather_hours`).
-- Photos are stored in Supabase Storage bucket `catch-photos` with object keys `{user_id}/{catch_id}.{ext}`. The API provides signed upload/download helpers.
+- Photos are stored in Supabase Storage bucket `catch-photos` with object keys `{user_id}/{catch_id}.webp`. The API provides:
+  - **Recommended**: Direct upload endpoint with server-side Sharp processing (resize, WebP conversion, EXIF stripping)
+  - **Alternative**: Signed upload/download URL helpers for direct-to-storage workflow
 
 ---
 
@@ -487,16 +489,76 @@ Notes:
 
 ---
 
-### 2.7 Catch photos (Supabase Storage)
+### 2.7 Catch photos (Supabase Storage + Sharp compression)
 
-Two viable designs exist:
-1) **Direct-to-Storage**: client uses Supabase SDK directly; API only stores `photo_path`.
-2) **Signed URL workflow** (recommended): API returns signed upload URLs to avoid exposing broad storage permissions patterns to the client beyond the JWT.
+**Architecture**: Hybrid approach with client-side resize + server-side compression.
 
-This plan chooses **(2)**.
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ CLIENT (Browser)                                                        │
+│ ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐      │
+│ │ 1. File select  │───►│ 2. Resize       │───►│ 3. Upload       │      │
+│ │ (max 10MB)      │    │ OffscreenCanvas │    │ FormData        │      │
+│ │                 │    │ (max 2000px)    │    │                 │      │
+│ └─────────────────┘    └─────────────────┘    └────────┬────────┘      │
+└────────────────────────────────────────────────────────┼────────────────┘
+                                                         │
+                                                         ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ SERVER (Astro API + Sharp)                                              │
+│ ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐      │
+│ │ 4. Sharp:       │───►│ 5. Convert to   │───►│ 6. Upload to    │      │
+│ │ - Resize final  │    │ WebP (q:80)     │    │ Supabase Storage│      │
+│ │ - Strip EXIF    │    │                 │    │                 │      │
+│ └─────────────────┘    └─────────────────┘    └─────────────────┘      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
-#### POST `/catches/{id}/photo/upload-url`
-- **Description**: Create a short-lived signed URL for uploading a photo object key for this catch.
+**Why this approach:**
+- ✅ No external client-side dependencies (native Canvas API)
+- ✅ Sharp is actively maintained (~weekly releases)
+- ✅ Full control over output format (WebP) and quality
+- ✅ EXIF stripping for privacy
+- ✅ Server can generate thumbnails in future
+
+#### POST `/catches/{id}/photo` (recommended - server-side processing)
+- **Description**: Upload photo with server-side compression via Sharp. Converts to WebP, strips EXIF metadata, resizes to max 2000px.
+- **Request**: `multipart/form-data`
+  - `file`: Image file (JPEG, PNG, WebP - max 10MB)
+- **Response 201**:
+
+```json
+{
+  "photo_path": "user_id/catch_id.webp",
+  "size_bytes": 245000,
+  "width": 1920,
+  "height": 1440
+}
+```
+
+- **Server-side processing (Sharp)**:
+
+```typescript
+import sharp from 'sharp';
+
+const processed = await sharp(buffer)
+  .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
+  .rotate() // Auto-rotate based on EXIF
+  .webp({ quality: 80 })
+  .toBuffer();
+```
+
+- **Errors**:
+  - `400 validation_error`:
+    - Unsupported content type (only `image/jpeg`, `image/png`, `image/webp`)
+    - File too large (>10MB)
+    - Invalid image data
+  - `401 unauthorized`
+  - `404 not_found` (catch not found)
+  - `413 payload_too_large` (file exceeds limit)
+
+#### POST `/catches/{id}/photo/upload-url` (alternative - signed URL workflow)
+- **Description**: Create a short-lived signed URL for direct upload to Storage. Use when server-side processing is not needed or for very large files.
 - **Request**:
 
 ```json
@@ -517,7 +579,7 @@ This plan chooses **(2)**.
   - `401 unauthorized`, `404 not_found`
 
 #### POST `/catches/{id}/photo/commit`
-- **Description**: After upload finishes, persist `photo_path` on the catch.
+- **Description**: After signed URL upload finishes, persist `photo_path` on the catch.
 - **Request**:
 
 ```json
@@ -716,7 +778,8 @@ RLS is enabled and forced on all domain tables; authorization logic is:
 - **Per-user** rate limit on weather refresh endpoints: e.g. `POST /trips/{id}/weather/refresh` to protect provider quotas.
 - **Request size limits**:
   - Manual weather hours payload caps (e.g., max 72 hours per snapshot).
-  - Photo upload uses signed URLs to keep large binary payloads out of API servers.
+  - Photo upload: max 10MB input, processed server-side via Sharp to optimized WebP (~200-500KB output).
+  - Alternative signed URL workflow available for direct-to-storage uploads.
 
 ---
 
@@ -803,9 +866,11 @@ API behavior:
   - Manual entry: `POST /trips/{tripId}/weather/manual`
   - Timeline read: `GET /weather/snapshots/{snapshotId}?include_hours=true`
   - Current snapshot selection: `GET /trips/{tripId}/weather/current` (manual preferred).
-- **Photo: compress client-side and upload**:
-  - `POST /catches/{id}/photo/upload-url` (signed upload)
-  - `POST /catches/{id}/photo/commit`
+- **Photo: resize client-side (Canvas API) + compress server-side (Sharp)**:
+  - `POST /catches/{id}/photo` (recommended - server-side Sharp processing to WebP)
+  - Alternative signed URL workflow:
+    - `POST /catches/{id}/photo/upload-url` (signed upload)
+    - `POST /catches/{id}/photo/commit`
   - `GET /catches/{id}/photo/download-url`
   - `DELETE /catches/{id}/photo`
 

@@ -8,15 +8,18 @@ import type {
   WeatherHourDto,
   TripWeatherCurrentResponseDto,
   WeatherManualResponseDto,
+  WeatherRefreshResponseDto,
   WeatherSnapshotRow,
 } from "@/types";
 import type {
   WeatherSnapshotListQuery,
   WeatherSnapshotGetQuery,
   WeatherManualCommandInput,
+  WeatherRefreshCommandInput,
 } from "@/lib/schemas/weather.schema";
 import { encodeCursor, decodeCursor } from "@/lib/api/pagination";
 import { mapSupabaseError, type MappedError } from "@/lib/errors/supabase-error-mapper";
+import { getWeatherProvider, mapWeatherProviderError } from "./weather-provider.service";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -489,5 +492,147 @@ export const weatherService = {
     }
 
     return { data: null, error: null };
+  },
+
+  // ---------------------------------------------------------------------------
+  // Refresh Weather from External API
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Fetches weather data from external API (AccuWeather) and creates a new snapshot.
+   *
+   * Business rules:
+   * - Trip must have location coordinates (lat/lng)
+   * - Trip must be within 24 hours old (unless force=true)
+   * - Creates snapshot with source='api'
+   *
+   * @param supabase - Supabase client from context.locals
+   * @param tripId - Trip UUID to fetch weather for
+   * @param input - Validated refresh command input
+   * @returns Created snapshot ID
+   */
+  async refreshWeather(
+    supabase: SupabaseClient,
+    tripId: UUID,
+    input: WeatherRefreshCommandInput
+  ): Promise<ServiceResult<WeatherRefreshResponseDto>> {
+    // 1. Fetch trip with location data
+    const { data: trip, error: tripError } = await supabase
+      .from("trips")
+      .select("id, location_lat, location_lng, started_at")
+      .eq("id", tripId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (tripError) {
+      const mapped = mapSupabaseError(tripError);
+      return { data: null, error: mapped };
+    }
+
+    if (!trip) {
+      return {
+        data: null,
+        error: {
+          code: "not_found",
+          message: "Wyprawa nie została znaleziona",
+          httpStatus: 404,
+        },
+      };
+    }
+
+    // 2. Validate trip has location
+    if (trip.location_lat === null || trip.location_lng === null) {
+      return {
+        data: null,
+        error: {
+          code: "validation_error",
+          message: "Wyprawa musi mieć lokalizację do odświeżenia pogody",
+          httpStatus: 400,
+        },
+      };
+    }
+
+    // 3. Check trip age (24h limit unless force=true)
+    const tripAge = Date.now() - new Date(trip.started_at).getTime();
+    const maxAge = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+    if (tripAge > maxAge && !input.force) {
+      return {
+        data: null,
+        error: {
+          code: "validation_error",
+          message: "Wyprawa jest starsza niż 24h. Użyj force=true lub wprowadź dane ręcznie",
+          httpStatus: 400,
+        },
+      };
+    }
+
+    // 4. Fetch weather from external provider
+    const weatherProvider = getWeatherProvider();
+    const weatherResult = await weatherProvider.fetchWeather({
+      lat: trip.location_lat,
+      lng: trip.location_lng,
+      periodStart: input.period_start,
+      periodEnd: input.period_end,
+    });
+
+    if (weatherResult.error) {
+      const mapped = mapWeatherProviderError(weatherResult.error);
+      return {
+        data: null,
+        error: {
+          code: mapped.code,
+          message: mapped.message,
+          httpStatus: mapped.httpStatus,
+        },
+      };
+    }
+
+    // 5. Create weather snapshot
+    const { data: snapshot, error: snapshotError } = await supabase
+      .from("weather_snapshots")
+      .insert({
+        trip_id: tripId,
+        source: "api" as const,
+        fetched_at: new Date().toISOString(),
+        period_start: input.period_start,
+        period_end: input.period_end,
+      })
+      .select("id")
+      .single();
+
+    if (snapshotError) {
+      const mapped = mapSupabaseError(snapshotError);
+      return { data: null, error: mapped };
+    }
+
+    // 6. Create weather hours (batch insert)
+    if (weatherResult.data.hours.length > 0) {
+      const hourInserts = weatherResult.data.hours.map((hour) => ({
+        snapshot_id: snapshot.id,
+        observed_at: hour.observed_at,
+        temperature_c: hour.temperature_c ?? null,
+        pressure_hpa: hour.pressure_hpa ?? null,
+        wind_speed_kmh: hour.wind_speed_kmh ?? null,
+        wind_direction: hour.wind_direction ?? null,
+        humidity_percent: hour.humidity_percent ?? null,
+        precipitation_mm: hour.precipitation_mm ?? null,
+        cloud_cover: hour.cloud_cover ?? null,
+        weather_icon: hour.weather_icon ?? null,
+        weather_text: hour.weather_text ?? null,
+      }));
+
+      const { error: hoursError } = await supabase.from("weather_hours").insert(hourInserts);
+
+      if (hoursError) {
+        // Snapshot was created - log error but continue
+        // Hours can be empty if provider didn't return data for the period
+      }
+    }
+
+    return {
+      data: { snapshot_id: snapshot.id },
+      error: null,
+    };
   },
 };
