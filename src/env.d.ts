@@ -3,6 +3,10 @@
 interface ImportMetaEnv {
   readonly SUPABASE_URL: string;
   readonly SUPABASE_KEY: string;
+  /** Public Supabase URL for client-side usage */
+  readonly PUBLIC_SUPABASE_URL: string;
+  /** Public Supabase anon key for client-side usage */
+  readonly PUBLIC_SUPABASE_ANON_KEY: string;
   readonly OPENROUTER_API_KEY: string;
   /** AccuWeather API key for weather data fetching */
   readonly ACCUWEATHER_API_KEY: string;

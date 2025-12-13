@@ -1,0 +1,28 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { LoginCard } from "@/components/auth/LoginCard";
+
+// Sprawdzenie autentykacji - zalogowani użytkownicy są przekierowywani do /app
+const {
+  data: { user },
+  error,
+} = await Astro.locals.supabase.auth.getUser();
+
+if (error) {
+  console.error("Auth check failed:", error.message);
+}
+
+if (user) {
+  return Astro.redirect("/app");
+}
+
+// Parsowanie redirectTo z query params
+const redirectTo = Astro.url.searchParams.get("redirect") || "/app";
+---
+
+<AuthLayout>
+  <main class="flex min-h-screen flex-col items-center justify-center px-4 py-12">
+    <LoginCard client:load redirectTo={redirectTo} />
+  </main>
+</AuthLayout>
+

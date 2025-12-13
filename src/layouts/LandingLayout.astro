@@ -1,0 +1,37 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Dziennik Wędkarski",
+  description = "Twój osobisty asystent wędkarski - zapisuj połowy, monitoruj pogodę i analizuj swoje wyprawy wędkarskie.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen overflow-x-hidden">
+    <slot />
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+  }
+</style>

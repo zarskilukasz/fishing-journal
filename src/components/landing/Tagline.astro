@@ -1,0 +1,18 @@
+---
+interface Props {
+  text?: string;
+  class?: string;
+}
+
+const { text = "Twój osobisty asystent wędkarski", class: className } = Astro.props;
+---
+
+<!-- M3: Body Large typography, On Surface Variant color -->
+<p
+  class:list={[
+    "max-w-md text-center text-base font-normal leading-relaxed text-muted-foreground",
+    className,
+  ]}
+>
+  {text}
+</p>

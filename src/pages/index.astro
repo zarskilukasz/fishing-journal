@@ -1,8 +1,24 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
+import LandingLayout from "@/layouts/LandingLayout.astro";
+import HeroSection from "@/components/landing/HeroSection.astro";
+
+// Sprawdzenie autentykacji - zalogowani użytkownicy są przekierowywani do /app
+const {
+  data: { user },
+  error,
+} = await Astro.locals.supabase.auth.getUser();
+
+if (error) {
+  console.error("Auth check failed:", error.message);
+  // Graceful degradation - renderuj stronę landing
+  // Użytkownik może spróbować się zalogować
+}
+
+if (user) {
+  return Astro.redirect("/app");
+}
 ---
 
-<Layout>
-  <Welcome />
-</Layout>
+<LandingLayout>
+  <HeroSection />
+</LandingLayout>

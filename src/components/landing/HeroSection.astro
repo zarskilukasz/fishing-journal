@@ -1,0 +1,30 @@
+---
+import Logo from "./Logo.astro";
+import Tagline from "./Tagline.astro";
+import { LoginButton } from "./LoginButton";
+---
+
+<!-- HIG: Clarity - generalna przestrzeń, czytelność -->
+<main class="flex min-h-screen flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+  <!-- HIG: White space jest kluczowy -->
+  <div class="flex w-full max-w-lg flex-col items-center gap-8 text-center">
+    <!-- Logo z nazwą aplikacji -->
+    <Logo />
+
+    <!-- Tagline -->
+    <Tagline />
+
+    <!-- HIG: Primary action button -->
+    <LoginButton client:load />
+
+    <!-- Fallback dla noscript -->
+    <noscript>
+      <a
+        href="/auth/login"
+        class="inline-flex h-10 items-center justify-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+      >
+        Zaloguj się
+      </a>
+    </noscript>
+  </div>
+</main>
