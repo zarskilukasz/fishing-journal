@@ -919,7 +919,7 @@ async function createManualWeatherSnapshot(
 
 | Pole | Zakres | Typ | Wymagane | Komunikat |
 |------|--------|-----|----------|-----------|
-| `observed_at` | valid datetime | string | Tak | "Wymagana data i czas obserwacji" |
+| `observed_at` | valid datetime, w zakresie period_start-period_end | string | Tak | "Wymagana data i czas obserwacji" / "Czas obserwacji musi być w zakresie okresu" |
 | `temperature_c` | -100 do 100 | number | Nie | "Temperatura musi być między -100°C a 100°C" |
 | `pressure_hpa` | 800 do 1200 | integer | Nie | "Ciśnienie musi być między 800 a 1200 hPa" |
 | `wind_speed_kmh` | >= 0 | number | Nie | "Prędkość wiatru nie może być ujemna" |
@@ -987,6 +987,20 @@ export const weatherManualFormSchema = z.object({
   {
     message: 'Koniec okresu musi być równy lub późniejszy niż początek',
     path: ['period_end'],
+  }
+).refine(
+  (data) => {
+    // Walidacja: każdy observed_at musi być w zakresie period_start - period_end
+    const start = new Date(data.period_start).getTime();
+    const end = new Date(data.period_end).getTime();
+    return data.hours.every(hour => {
+      const observed = new Date(hour.observed_at).getTime();
+      return observed >= start && observed <= end;
+    });
+  },
+  {
+    message: 'Wszystkie czasy obserwacji muszą być w zakresie okresu',
+    path: ['hours'],
   }
 );
 ```

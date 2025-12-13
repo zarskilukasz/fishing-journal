@@ -439,7 +439,9 @@ export interface CreateTripCommand {
 }
 
 export interface QuickStartTripCommand {
-  use_gps: boolean;
+  /** Optional GPS location (frontend obtains via Geolocation API) */
+  location?: TripLocationDto | null;
+  /** Copy equipment from user's last trip */
   copy_equipment_from_last_trip: boolean;
 }
 

@@ -588,9 +588,7 @@ interface FishSpeciesListResponseDto {
 interface FishSpeciesDto {
   id: UUID;
   name: string;
-  latin_name: string | null;
   created_at: ISODateTime;
-  updated_at: ISODateTime;
 }
 ```
 

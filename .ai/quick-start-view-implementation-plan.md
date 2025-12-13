@@ -150,7 +150,9 @@ Dashboard (/app)
 ```typescript
 // Command wysyłany do API
 interface QuickStartTripCommand {
-  use_gps: boolean;
+  /** Opcjonalna lokalizacja GPS (frontend pobiera przez Geolocation API) */
+  location?: TripLocationDto | null;
+  /** Czy skopiować sprzęt z ostatniej wyprawy */
   copy_equipment_from_last_trip: boolean;
 }
 
@@ -411,15 +413,32 @@ const response = await fetch("/api/v1/trips/quick-start", {
 
 ```typescript
 interface QuickStartTripCommand {
-  use_gps: boolean;
+  /** Opcjonalna lokalizacja GPS (frontend pobiera przez Geolocation API) */
+  location?: {
+    lat: number;
+    lng: number;
+    label?: string | null;
+  } | null;
+  /** Czy skopiować sprzęt z ostatniej wyprawy */
   copy_equipment_from_last_trip: boolean;
 }
 ```
 
-**Przykład żądania**:
+**Przykład żądania (z lokalizacją)**:
 ```json
 {
-  "use_gps": true,
+  "location": {
+    "lat": 52.2297,
+    "lng": 21.0122,
+    "label": null
+  },
+  "copy_equipment_from_last_trip": true
+}
+```
+
+**Przykład żądania (bez lokalizacji)**:
+```json
+{
   "copy_equipment_from_last_trip": true
 }
 ```
@@ -846,26 +865,32 @@ export function useGeolocation(options: UseGeolocationOptions = {}): UseGeolocat
 }
 ```
 
-### 10.3 Zaktualizowany typ żądania API
+### 10.3 Typ żądania API z lokalizacją
 
-Zmiana w `QuickStartTripCommand` - zamiast wysyłać tylko `use_gps: boolean`, wysyłamy opcjonalne współrzędne:
+`QuickStartTripCommand` przyjmuje opcjonalne współrzędne GPS pobrane przez frontend:
 
 ```typescript
-// src/types.ts - zaktualizowany typ
+// src/types.ts
 
 /**
  * Command do szybkiego startu wyprawy
  */
 interface QuickStartTripCommand {
-  /** Opcjonalna lokalizacja GPS (jeśli użytkownik wyraził zgodę i lokalizacja dostępna) */
+  /** Opcjonalna lokalizacja GPS (frontend pobiera przez Geolocation API) */
   location?: {
-    lat: number;
-    lng: number;
-  };
+    lat: number;   // -90 do 90
+    lng: number;   // -180 do 180
+    label?: string | null;  // opcjonalna nazwa miejsca
+  } | null;
   /** Czy skopiować sprzęt z ostatniej wyprawy */
   copy_equipment_from_last_trip: boolean;
 }
 ```
+
+**Walidacja serwera (Zod schema)**:
+- `location.lat`: number, min -90, max 90
+- `location.lng`: number, min -180, max 180
+- `location.label`: string, max 255 znaków, opcjonalne
 
 ### 10.4 Zaktualizowany hook `useQuickStart`
 

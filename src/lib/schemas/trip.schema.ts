@@ -152,10 +152,15 @@ export type CreateTripInput = z.infer<typeof createTripSchema>;
 /**
  * Request body schema for quick-start trip creation.
  * Creates a trip with started_at=now() and status=active.
+ *
+ * GPS handling:
+ * - Frontend is responsible for obtaining GPS coordinates via Geolocation API
+ * - If location is provided, it will be saved to the trip
+ * - If location is null/undefined, trip is created without location
  */
 export const quickStartTripSchema = z.object({
-  /** Whether to use GPS location (handled by frontend) */
-  use_gps: z.boolean(),
+  /** Optional GPS location (frontend obtains via Geolocation API) */
+  location: tripLocationSchema.optional(),
   /** Copy equipment from user's last trip */
   copy_equipment_from_last_trip: z.boolean(),
 });

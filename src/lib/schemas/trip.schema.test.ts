@@ -575,48 +575,66 @@ describe("trip.schema", () => {
   // ---------------------------------------------------------------------------
 
   describe("quickStartTripSchema", () => {
-    it("accepts valid input with both booleans true", () => {
+    it("accepts valid input with location and copy_equipment_from_last_trip", () => {
       const result = quickStartTripSchema.safeParse({
-        use_gps: true,
+        location: { lat: 52.2297, lng: 21.0122, label: "Wisła" },
         copy_equipment_from_last_trip: true,
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.use_gps).toBe(true);
+        expect(result.data.location?.lat).toBe(52.2297);
+        expect(result.data.location?.lng).toBe(21.0122);
+        expect(result.data.location?.label).toBe("Wisła");
         expect(result.data.copy_equipment_from_last_trip).toBe(true);
       }
     });
 
-    it("accepts valid input with both booleans false", () => {
+    it("accepts valid input without location (null)", () => {
       const result = quickStartTripSchema.safeParse({
-        use_gps: false,
+        location: null,
         copy_equipment_from_last_trip: false,
       });
 
       expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.location).toBe(null);
+        expect(result.data.copy_equipment_from_last_trip).toBe(false);
+      }
     });
 
-    it("rejects missing use_gps", () => {
+    it("accepts valid input without location field (optional)", () => {
       const result = quickStartTripSchema.safeParse({
         copy_equipment_from_last_trip: true,
       });
 
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.location).toBeUndefined();
+        expect(result.data.copy_equipment_from_last_trip).toBe(true);
+      }
     });
 
     it("rejects missing copy_equipment_from_last_trip", () => {
       const result = quickStartTripSchema.safeParse({
-        use_gps: true,
+        location: { lat: 52.2297, lng: 21.0122 },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it("rejects non-boolean use_gps", () => {
+    it("rejects invalid location coordinates", () => {
       const result = quickStartTripSchema.safeParse({
-        use_gps: "true",
+        location: { lat: 91, lng: 21.0122 },
         copy_equipment_from_last_trip: true,
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects non-boolean copy_equipment_from_last_trip", () => {
+      const result = quickStartTripSchema.safeParse({
+        copy_equipment_from_last_trip: "true",
       });
 
       expect(result.success).toBe(false);

@@ -7,14 +7,17 @@ import { createErrorResponse, createCreatedResponse } from "@/lib/api/error-resp
  * POST /api/v1/trips/quick-start
  *
  * Creates a new trip with one click (started_at=now, status=active).
- * Optionally copies equipment from the user's last trip.
+ * Optionally saves GPS location and copies equipment from the user's last trip.
  *
  * Request body:
- * - use_gps: Whether to use GPS location (handled by frontend, backend ignores)
- * - copy_equipment_from_last_trip: Copy equipment from user's last trip
+ * - location: Optional GPS coordinates (frontend obtains via Geolocation API)
+ *   - lat: number (-90 to 90)
+ *   - lng: number (-180 to 180)
+ *   - label: string | null (optional place name)
+ * - copy_equipment_from_last_trip: boolean - Copy equipment from user's last trip
  *
  * Response includes:
- * - trip: The created trip DTO
+ * - trip: The created trip DTO (with location if provided)
  * - copied_equipment: Object with arrays of copied rod_ids, lure_ids, groundbait_ids
  */
 export const POST: APIRoute = async ({ locals, request }) => {
@@ -47,8 +50,9 @@ export const POST: APIRoute = async ({ locals, request }) => {
     });
   }
 
-  // 4. Execute service (use_gps is frontend concern, we only care about copy_equipment)
+  // 4. Execute service with location and copy_equipment options
   const result = await tripService.quickStart(supabase, user.id, {
+    location: parseResult.data.location ?? null,
     copy_equipment_from_last_trip: parseResult.data.copy_equipment_from_last_trip,
   });
 

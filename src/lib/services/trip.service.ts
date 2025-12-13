@@ -394,17 +394,20 @@ export const tripService = {
 
   /**
    * Creates a trip with one click (started_at=now, status=active).
-   * Optionally copies equipment from last trip.
+   * Optionally saves GPS location and copies equipment from last trip.
    *
    * @param supabase - Supabase client from context.locals
    * @param userId - User ID from session
-   * @param input - Quick start input (use_gps is frontend concern, copy_equipment flag)
+   * @param input - Quick start input with optional location and copy_equipment flag
    * @returns Created trip with list of copied equipment IDs
    */
   async quickStart(
     supabase: SupabaseClient,
     userId: UUID,
-    input: { copy_equipment_from_last_trip: boolean }
+    input: {
+      location?: TripLocationDto | null;
+      copy_equipment_from_last_trip: boolean;
+    }
   ): Promise<ServiceResult<QuickStartTripResponseDto>> {
     // Create trip with current timestamp and active status
     const insertData: Partial<TripRow> = {
@@ -412,9 +415,9 @@ export const tripService = {
       started_at: new Date().toISOString(),
       ended_at: null,
       status: "active",
-      location_lat: null,
-      location_lng: null,
-      location_label: null,
+      location_lat: input.location?.lat ?? null,
+      location_lng: input.location?.lng ?? null,
+      location_label: input.location?.label ?? null,
     };
 
     const { data, error } = await supabase.from("trips").insert(insertData).select().single();

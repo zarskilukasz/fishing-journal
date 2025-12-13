@@ -711,7 +711,7 @@ export function useTripDetails(tripId: string): UseTripDetailsReturn {
       }
       
       // Redirect to dashboard after delete
-      window.location.href = '/app/dashboard';
+      window.location.href = '/app';
     } catch (error) {
       setState(prev => ({ ...prev, isDeleting: false }));
       throw error;
@@ -931,135 +931,150 @@ const response = await fetch(`/api/v1/trips/${tripId}`, {
 
 ### 7.4 Endpointy pogodowe
 
-Widok Szczegóły Wyprawy integruje się z następującymi endpointami pogodowymi:
+Widok Szczegóły Wyprawy integruje się z następującymi endpointami pogodowymi zdefiniowanymi w `api-plan.md`:
 
 #### GET /api/v1/trips/{tripId}/weather/current
-Pobiera aktualne dane pogodowe dla wyprawy (jeśli istnieją).
+Pobiera aktualny snapshot pogodowy dla wyprawy (preferuje manual > api).
 
 **Request:**
 ```typescript
 const response = await fetch(`/api/v1/trips/${tripId}/weather/current`);
 ```
 
-**Response type:** `TripWeatherCurrentResponseDto`
+**Response type (200 OK):** `TripWeatherCurrentResponseDto`
 ```typescript
 interface TripWeatherCurrentResponseDto {
   snapshot_id: string;
   source: 'api' | 'manual';
-  observation_time: string;
-  data: WeatherDataDto;
-  created_at: string;
 }
 ```
 
-#### POST /api/v1/trips/{tripId}/weather/current
-Tworzy dane pogodowe dla wyprawy (ręcznie lub automatycznie).
+**Błędy:**
+- `404 not_found` - brak snapshotów pogodowych dla wyprawy
+
+#### POST /api/v1/trips/{tripId}/weather/refresh
+Pobiera dane pogodowe z zewnętrznego API i tworzy nowy snapshot.
 
 **Request:**
 ```typescript
-const response = await fetch(`/api/v1/trips/${tripId}/weather/current`, {
+const response = await fetch(`/api/v1/trips/${tripId}/weather/refresh`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    source: 'manual',
-    data: {
-      temperature_c: 22,
-      pressure_hpa: 1013,
-      wind_speed_kmh: 10,
-      wind_direction_deg: 180,
-      cloud_cover_percent: 50,
-      precipitation_type: null
-    }
+    period_start: '2025-12-13T08:00:00Z',
+    period_end: '2025-12-13T16:00:00Z',
+    force: false
   }),
 });
 ```
 
-**Response:** `TripWeatherCurrentResponseDto` (201 Created)
+**Response (201 Created):** `WeatherRefreshResponseDto`
+```typescript
+interface WeatherRefreshResponseDto {
+  snapshot_id: string;
+}
+```
 
-#### PUT /api/v1/trips/{tripId}/weather/current
-Aktualizuje istniejące dane pogodowe.
+#### POST /api/v1/trips/{tripId}/weather/manual
+Tworzy ręczny snapshot pogodowy z danymi godzinowymi.
 
 **Request:**
 ```typescript
-const response = await fetch(`/api/v1/trips/${tripId}/weather/current`, {
-  method: 'PUT',
+const response = await fetch(`/api/v1/trips/${tripId}/weather/manual`, {
+  method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    data: {
-      temperature_c: 24,
-      pressure_hpa: 1015
-    }
+    fetched_at: '2025-12-13T10:00:00Z',
+    period_start: '2025-12-13T08:00:00Z',
+    period_end: '2025-12-13T16:00:00Z',
+    hours: [
+      {
+        observed_at: '2025-12-13T08:00:00Z',
+        temperature_c: 12,
+        pressure_hpa: 1015,
+        wind_speed_kmh: 10,
+        wind_direction: 180,
+        humidity_percent: 75,
+        precipitation_mm: 0,
+        cloud_cover: 50,
+        weather_icon: null,
+        weather_text: 'Częściowe zachmurzenie'
+      }
+    ]
   }),
 });
 ```
 
-**Response:** `TripWeatherCurrentResponseDto` (200 OK)
+**Response (201 Created):** `WeatherManualResponseDto`
+```typescript
+interface WeatherManualResponseDto {
+  snapshot_id: string;
+}
+```
 
-#### DELETE /api/v1/trips/{tripId}/weather/current
-Usuwa dane pogodowe wyprawy.
+#### GET /api/v1/trips/{tripId}/weather/snapshots
+Lista wszystkich snapshotów pogodowych dla wyprawy.
 
 **Request:**
 ```typescript
-const response = await fetch(`/api/v1/trips/${tripId}/weather/current`, {
-  method: 'DELETE',
-});
+const response = await fetch(`/api/v1/trips/${tripId}/weather/snapshots?limit=20&sort=fetched_at&order=desc`);
 ```
 
-**Response:** `204 No Content`
-
-#### GET /api/v1/trips/{tripId}/weather/history
-Pobiera historię zmian pogody (wszystkie snapshoty).
-
-**Request:**
+**Response type:** `WeatherSnapshotListResponseDto`
 ```typescript
-const response = await fetch(`/api/v1/trips/${tripId}/weather/history`);
-```
-
-**Response type:** `TripWeatherHistoryResponseDto`
-```typescript
-interface TripWeatherHistoryResponseDto {
-  snapshots: Array<{
-    snapshot_id: string;
-    source: 'api' | 'manual';
-    observation_time: string;
-    data: WeatherDataDto;
-    created_at: string;
-  }>;
+interface WeatherSnapshotListResponseDto {
+  data: WeatherSnapshotDto[];
+  page: PageInfo;
 }
 ```
 
 #### GET /api/v1/weather/snapshots/{snapshotId}
-Pobiera szczegóły konkretnego snapshota pogodowego.
+Pobiera szczegóły konkretnego snapshota pogodowego z danymi godzinowymi.
 
 **Request:**
 ```typescript
-const response = await fetch(`/api/v1/weather/snapshots/${snapshotId}`);
+const response = await fetch(`/api/v1/weather/snapshots/${snapshotId}?include_hours=true`);
 ```
 
-**Response type:** `WeatherSnapshotResponseDto`
+**Response type:** `WeatherSnapshotGetResponseDto`
+```typescript
+interface WeatherSnapshotGetResponseDto {
+  snapshot: WeatherSnapshotDetailDto;
+  hours: WeatherHourDto[];
+}
+```
 
 ### 7.5 Typy danych pogodowych
 
 ```typescript
-interface WeatherDataDto {
+// Pojedynczy wpis godzinowy pogody
+interface WeatherHourDto {
+  observed_at: string;        // ISO datetime
   temperature_c: number | null;
   pressure_hpa: number | null;
-  humidity_percent: number | null;
   wind_speed_kmh: number | null;
-  wind_direction_deg: number | null;
-  wind_gust_kmh: number | null;
-  cloud_cover_percent: number | null;
-  visibility_km: number | null;
-  precipitation_type: 'none' | 'rain' | 'snow' | 'sleet' | null;
-  weather_code: number | null;
+  wind_direction: number | null;  // 0-360 stopni
+  humidity_percent: number | null;
+  precipitation_mm: number | null;
+  cloud_cover: number | null;     // 0-100%
+  weather_icon: string | null;
   weather_text: string | null;
 }
 
+// Aktualny snapshot pogodowy dla wyprawy
 interface TripWeatherCurrentDto {
   snapshot_id: string;
   source: 'api' | 'manual';
-  observation_time: string;
-  data: WeatherDataDto;
+}
+
+// Szczegóły snapshota pogodowego
+interface WeatherSnapshotDetailDto {
+  id: string;
+  trip_id: string;
+  source: 'api' | 'manual';
+  fetched_at: string;
+  period_start: string;
+  period_end: string;
 }
 ```
 
@@ -1083,8 +1098,8 @@ interface ApiErrorResponse {
 | 400 | `validation_error` | Nieprawidłowe dane wejściowe |
 | 401 | `unauthorized` | Brak sesji użytkownika |
 | 404 | `not_found` | Wyprawa lub dane pogodowe nie istnieją |
-| 409 | `conflict` | Dane pogodowe już istnieją (dla POST) |
-| 500 | `internal_error` | Błąd serwera lub zewnętrznego API pogody |
+| 502 | `bad_gateway` | Błąd zewnętrznego API pogody (dla refresh) |
+| 500 | `internal_error` | Błąd serwera |
 
 ## 8. Interakcje użytkownika
 

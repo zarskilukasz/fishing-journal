@@ -361,7 +361,9 @@ interface TripListResponseDto {
 
 // Command dla quick-start
 interface QuickStartTripCommand {
-  use_gps: boolean;
+  /** Opcjonalna lokalizacja GPS (frontend pobiera przez Geolocation API) */
+  location?: TripLocationDto | null;
+  /** Czy skopiować sprzęt z ostatniej wyprawy */
   copy_equipment_from_last_trip: boolean;
 }
 
@@ -601,7 +603,13 @@ const fetchTrips = async (pageParam?: string): Promise<TripListResponseDto> => {
 **Request:**
 ```typescript
 interface QuickStartTripCommand {
-  use_gps: boolean;
+  /** Opcjonalna lokalizacja GPS (frontend pobiera przez Geolocation API) */
+  location?: {
+    lat: number;   // -90 do 90
+    lng: number;   // -180 do 180
+    label?: string | null;  // opcjonalna nazwa miejsca
+  } | null;
+  /** Czy skopiować sprzęt z ostatniej wyprawy */
   copy_equipment_from_last_trip: boolean;
 }
 ```
@@ -609,7 +617,7 @@ interface QuickStartTripCommand {
 **Response (201 Created):**
 ```typescript
 interface QuickStartTripResponseDto {
-  trip: TripDto;
+  trip: TripDto;  // trip.location zawiera współrzędne jeśli były podane
   copied_equipment: {
     rod_ids: UUID[];
     lure_ids: UUID[];
@@ -618,14 +626,44 @@ interface QuickStartTripResponseDto {
 }
 ```
 
-**Użycie:**
+**Użycie (z Geolocation API):**
 ```typescript
-const quickStartTrip = async (command: QuickStartTripCommand): Promise<QuickStartTripResponseDto> => {
+const quickStartTrip = async (
+  copyEquipment: boolean,
+  useGps: boolean
+): Promise<QuickStartTripResponseDto> => {
+  let location: { lat: number; lng: number } | undefined;
+  
+  // Pobierz lokalizację jeśli użytkownik wybrał GPS
+  if (useGps && navigator.geolocation) {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        });
+      });
+      location = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+    } catch {
+      // Kontynuuj bez lokalizacji w przypadku błędu GPS
+    }
+  }
+  
+  const command: QuickStartTripCommand = {
+    location,
+    copy_equipment_from_last_trip: copyEquipment,
+  };
+  
   const response = await fetch("/api/v1/trips/quick-start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(command),
   });
+  
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error?.message || "Failed to create trip");
@@ -704,7 +742,9 @@ const quickStartTrip = async (command: QuickStartTripCommand): Promise<QuickStar
 | GET /trips | `sort` musi być dozwolony | 400 validation_error |
 | GET /trips | `order` musi być asc/desc | 400 validation_error |
 | GET /trips | `cursor` musi być valid | 400 validation_error |
-| POST /quick-start | `use_gps` required boolean | 400 validation_error |
+| POST /quick-start | `location.lat` musi być w zakresie -90 do 90 | 400 validation_error |
+| POST /quick-start | `location.lng` musi być w zakresie -180 do 180 | 400 validation_error |
+| POST /quick-start | `location.label` max 255 znaków | 400 validation_error |
 | POST /quick-start | `copy_equipment_from_last_trip` required boolean | 400 validation_error |
 
 ### 9.2 Walidacja UI
