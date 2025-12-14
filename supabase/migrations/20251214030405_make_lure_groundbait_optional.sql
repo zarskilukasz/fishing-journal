@@ -51,8 +51,8 @@ begin
 end;
 $$;
 
--- 3. Update validate_catch_equipment trigger to handle nullable values
-create or replace function public.validate_catch_equipment()
+-- 3. Update check_catch_owner_consistency trigger to handle nullable values
+create or replace function public.check_catch_owner_consistency()
 returns trigger
 language plpgsql
 as $$

@@ -70,7 +70,7 @@ export function TripDetailsContent({ trip, summary }: TripDetailsContentProps) {
   const handleCatchSuccess = useCallback(
     (_createdCatch: CatchDto) => {
       // Invalidate trip details query to refresh catches list
-      queryClient.invalidateQueries({ queryKey: ["trips", "detail", tripId] });
+      queryClient.invalidateQueries({ queryKey: ["trip", "details", tripId] });
     },
     [queryClient, tripId]
   );

@@ -96,6 +96,7 @@ const groundbaitId = formData.groundbait_id || null;
 | `src/types.ts` | CatchRow, CreateCatchCommand |
 | `src/lib/schemas/catch.schema.ts` | createCatchSchema |
 | `src/lib/schemas/catch-form.schema.ts` | catchFormSchema, optionalUuid |
+| `src/lib/services/catch.service.ts` | Explicit `?? null` dla lure_id/groundbait_id |
 | `src/components/hooks/useCatchForm.ts` | handleSubmit |
 | `src/components/catches/types.ts` | catchDtoToFormData |
 | `src/components/catches/LureSelect.tsx` | Label z "(opcjonalnie)" |

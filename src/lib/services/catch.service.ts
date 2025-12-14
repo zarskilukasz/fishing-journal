@@ -249,8 +249,8 @@ export const catchService = {
         trip_id: tripId,
         caught_at: input.caught_at,
         species_id: input.species_id,
-        lure_id: input.lure_id,
-        groundbait_id: input.groundbait_id,
+        lure_id: input.lure_id ?? null,
+        groundbait_id: input.groundbait_id ?? null,
         weight_g: input.weight_g ?? null,
         length_mm: input.length_mm ?? null,
       })
