@@ -48,8 +48,7 @@ export function TripDetailsContent({ trip, summary }: TripDetailsContentProps) {
   const [isCatchDialogOpen, setIsCatchDialogOpen] = useState(false);
 
   const handleClose = useCallback(() => {
-    const endedAt = new Date().toISOString();
-    closeTrip(endedAt);
+    closeTrip();
   }, [closeTrip]);
 
   const handleDelete = useCallback(() => {
@@ -103,7 +102,13 @@ export function TripDetailsContent({ trip, summary }: TripDetailsContentProps) {
       {trip.location && <LocationSection location={trip.location} />}
 
       {/* Weather section */}
-      <WeatherSection weatherCurrent={trip.weather_current ?? null} tripId={tripId} />
+      <WeatherSection
+        weatherCurrent={trip.weather_current ?? null}
+        tripId={tripId}
+        tripStartedAt={trip.started_at}
+        tripEndedAt={trip.ended_at}
+        location={trip.location}
+      />
 
       {/* Catches section */}
       <CatchesSection catches={trip.catches ?? []} tripId={tripId} />

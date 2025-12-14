@@ -8,7 +8,7 @@ import type { TripActions } from "../types";
 interface TripActionsContextValue {
   tripId: string;
   actions: TripActions;
-  closeTrip: (endedAt: string) => Promise<void>;
+  closeTrip: () => Promise<void>;
   deleteTrip: () => Promise<void>;
   isClosing: boolean;
   isDeleting: boolean;

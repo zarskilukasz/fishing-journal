@@ -577,24 +577,27 @@ export const tripService = {
   // ---------------------------------------------------------------------------
 
   /**
-   * Closes a trip (sets status to 'closed' and ended_at).
+   * Closes a trip (sets status to 'closed').
+   * Note: ended_at is NOT modified here - it can only be set through the trip edit page.
    *
    * @param supabase - Supabase client from context.locals
    * @param id - Trip UUID
-   * @param endedAt - End datetime
    * @returns Closed trip DTO
    */
-  async close(supabase: SupabaseClient, id: UUID, endedAt: string): Promise<ServiceResult<TripDto>> {
-    // First, get existing trip to validate
-    const { data: existingTrip, error: fetchError } = await supabase
+  async close(supabase: SupabaseClient, id: UUID): Promise<ServiceResult<TripDto>> {
+    // Update trip status only
+    const { data, error } = await supabase
       .from("trips")
-      .select("started_at")
+      .update({
+        status: "closed" as const,
+      })
       .eq("id", id)
       .is("deleted_at", null)
+      .select()
       .single();
 
-    if (fetchError) {
-      if (fetchError.code === "PGRST116") {
+    if (error) {
+      if (error.code === "PGRST116") {
         return {
           data: null,
           error: {
@@ -604,34 +607,6 @@ export const tripService = {
           },
         };
       }
-      const mapped = mapSupabaseError(fetchError);
-      return { data: null, error: mapped };
-    }
-
-    // Validate: ended_at >= started_at
-    if (new Date(endedAt) < new Date(existingTrip.started_at)) {
-      return {
-        data: null,
-        error: {
-          code: "validation_error",
-          message: "ended_at must be greater than or equal to started_at",
-          httpStatus: 400,
-        },
-      };
-    }
-
-    // Update trip
-    const { data, error } = await supabase
-      .from("trips")
-      .update({
-        status: "closed" as const,
-        ended_at: endedAt,
-      })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) {
       const mapped = mapSupabaseError(error);
       return { data: null, error: mapped };
     }

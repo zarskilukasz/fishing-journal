@@ -123,7 +123,7 @@ export interface WeatherHourViewModel {
 export interface UseTripDetailsReturn {
   state: TripDetailsState;
   actions: {
-    closeTrip: (endedAt: string) => Promise<void>;
+    closeTrip: () => Promise<void>;
     deleteTrip: () => Promise<void>;
     refresh: () => Promise<void>;
   };
@@ -198,6 +198,9 @@ export interface LocationMapProps {
 export interface WeatherSectionProps {
   weatherCurrent: TripWeatherCurrentDto | null;
   tripId: string;
+  tripStartedAt: string;
+  tripEndedAt: string | null;
+  location: TripLocationDto | null;
 }
 
 /**
@@ -211,7 +214,8 @@ export interface WeatherManualBannerProps {
  * Props for WeatherTimeline component
  */
 export interface WeatherTimelineProps {
-  snapshotId: string;
+  /** Array of hourly weather data from API */
+  hours: import("@/types").WeatherHourDto[];
 }
 
 /**

@@ -93,15 +93,25 @@ export type WeatherSnapshotGetQuery = z.infer<typeof weatherSnapshotGetQuerySche
 // ---------------------------------------------------------------------------
 
 /**
+ * Common datetime options for accepting PostgreSQL/Supabase timestamptz format.
+ * - offset: true - accepts timezone offsets like +00:00 (and also Z suffix)
+ *
+ * Note: We don't specify precision to accept any fractional second format (0, 3, or 6 digits).
+ */
+const datetimeOptions = { offset: true } as const;
+
+/**
  * Request body schema for refreshing weather from external API.
  * Validates period dates and ensures period_end >= period_start.
  */
 export const weatherRefreshCommandSchema = z
   .object({
     /** Start of weather period (ISO 8601 datetime) */
-    period_start: z.string().datetime("Nieprawidłowy format datetime dla period_start"),
+    period_start: z
+      .string()
+      .datetime({ ...datetimeOptions, message: "Nieprawidłowy format datetime dla period_start" }),
     /** End of weather period (ISO 8601 datetime) */
-    period_end: z.string().datetime("Nieprawidłowy format datetime dla period_end"),
+    period_end: z.string().datetime({ ...datetimeOptions, message: "Nieprawidłowy format datetime dla period_end" }),
     /** Force refresh for older trips (default false) */
     force: z.boolean().default(false),
   })
@@ -122,7 +132,7 @@ export type WeatherRefreshCommandInput = z.infer<typeof weatherRefreshCommandSch
  */
 export const weatherHourSchema = z.object({
   /** Observation timestamp (required, ISO 8601 datetime) */
-  observed_at: z.string().datetime("Nieprawidłowy format datetime dla observed_at"),
+  observed_at: z.string().datetime({ ...datetimeOptions, message: "Nieprawidłowy format datetime dla observed_at" }),
   /** Temperature in Celsius (-100 to 100) */
   temperature_c: z
     .number()
@@ -185,11 +195,13 @@ export type WeatherHourInput = z.infer<typeof weatherHourSchema>;
 export const weatherManualCommandSchema = z
   .object({
     /** When the data was fetched/entered (ISO 8601 datetime) */
-    fetched_at: z.string().datetime("Nieprawidłowy format datetime dla fetched_at"),
+    fetched_at: z.string().datetime({ ...datetimeOptions, message: "Nieprawidłowy format datetime dla fetched_at" }),
     /** Start of weather period (ISO 8601 datetime) */
-    period_start: z.string().datetime("Nieprawidłowy format datetime dla period_start"),
+    period_start: z
+      .string()
+      .datetime({ ...datetimeOptions, message: "Nieprawidłowy format datetime dla period_start" }),
     /** End of weather period (ISO 8601 datetime) */
-    period_end: z.string().datetime("Nieprawidłowy format datetime dla period_end"),
+    period_end: z.string().datetime({ ...datetimeOptions, message: "Nieprawidłowy format datetime dla period_end" }),
     /** Array of hourly weather entries (min 1 entry) */
     hours: z.array(weatherHourSchema).min(1, "Wymagany jest co najmniej jeden wpis godzinowy"),
   })

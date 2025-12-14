@@ -1,14 +1,24 @@
 /**
  * LocationSection - Form section for location management.
- * Contains GPS location picker and location label input.
+ * Contains GPS location picker, map picker, and location label input.
  */
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, Suspense, lazy } from "react";
 import { Controller, type ControllerRenderProps } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+} from "@/components/ui/responsive-dialog";
 import type { LocationSectionProps } from "./types";
 import type { TripEditFormData } from "@/lib/schemas/trip-edit.schema";
+
+// Lazy load the map picker to reduce initial bundle size
+const LocationPickerMap = lazy(() => import("./LocationPickerMap").then((mod) => ({ default: mod.LocationPickerMap })));
 
 /**
  * Map pin icon
@@ -77,6 +87,51 @@ function TrashIcon() {
 }
 
 /**
+ * Map icon for "select on map" button
+ */
+function MapIcon() {
+  return (
+    <svg
+      className="h-4 w-4"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" />
+      <path d="M15 5.764v15" />
+      <path d="M9 3.236v15" />
+    </svg>
+  );
+}
+
+/**
+ * Loading spinner for map picker
+ */
+function MapLoadingSpinner() {
+  return (
+    <div className="flex flex-col items-center justify-center h-[400px] bg-secondary rounded-lg">
+      <svg
+        className="h-8 w-8 animate-spin text-primary"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        aria-hidden="true"
+      >
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      </svg>
+      <p className="mt-3 text-sm text-muted-foreground">Ładowanie mapy...</p>
+    </div>
+  );
+}
+
+/**
  * Props for inner location field component
  */
 interface LocationFieldProps {
@@ -90,6 +145,34 @@ interface LocationFieldProps {
 function LocationField({ field, locationError }: LocationFieldProps) {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
+  const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
+  const [tempMapLocation, setTempMapLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Open map picker dialog
+  const handleOpenMapPicker = useCallback(() => {
+    // Initialize temp location with current value or null
+    setTempMapLocation(field.value ? { lat: field.value.lat, lng: field.value.lng } : null);
+    setIsMapPickerOpen(true);
+  }, [field.value]);
+
+  // Confirm map selection
+  const handleConfirmMapLocation = useCallback(() => {
+    if (tempMapLocation) {
+      field.onChange({
+        lat: tempMapLocation.lat,
+        lng: tempMapLocation.lng,
+        label: field.value?.label ?? "",
+      });
+      setGpsError(null);
+    }
+    setIsMapPickerOpen(false);
+  }, [tempMapLocation, field]);
+
+  // Cancel map selection
+  const handleCancelMapPicker = useCallback(() => {
+    setIsMapPickerOpen(false);
+    setTempMapLocation(null);
+  }, []);
 
   const handleGetGPS = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -202,10 +285,16 @@ function LocationField({ field, locationError }: LocationFieldProps) {
                 <MapPinIcon />
               </div>
               <p className="text-sm text-muted-foreground mb-4">Nie ustawiono lokalizacji</p>
-              <Button type="button" variant="secondary" onClick={handleGetGPS} disabled={isGettingLocation}>
-                <NavigationIcon />
-                {isGettingLocation ? "Pobieranie..." : "Użyj mojej lokalizacji"}
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                <Button type="button" variant="secondary" onClick={handleGetGPS} disabled={isGettingLocation}>
+                  <NavigationIcon />
+                  {isGettingLocation ? "Pobieranie..." : "Użyj mojej lokalizacji"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleOpenMapPicker}>
+                  <MapIcon />
+                  Wybierz na mapie
+                </Button>
+              </div>
             </div>
           </>
         )}
@@ -217,20 +306,46 @@ function LocationField({ field, locationError }: LocationFieldProps) {
           </p>
         )}
 
-        {/* Update location button (when location exists) */}
+        {/* Update location buttons (when location exists) */}
         {field.value && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGetGPS}
-            disabled={isGettingLocation}
-            className="w-full"
-          >
-            <NavigationIcon />
-            {isGettingLocation ? "Pobieranie..." : "Zaktualizuj lokalizację"}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGetGPS}
+              disabled={isGettingLocation}
+              className="flex-1"
+            >
+              <NavigationIcon />
+              {isGettingLocation ? "Pobieranie..." : "Zaktualizuj z GPS"}
+            </Button>
+            <Button type="button" variant="outline" onClick={handleOpenMapPicker} className="flex-1">
+              <MapIcon />
+              Zmień na mapie
+            </Button>
+          </div>
         )}
       </div>
+
+      {/* Map Picker Dialog */}
+      <ResponsiveDialog open={isMapPickerOpen} onOpenChange={setIsMapPickerOpen}>
+        <ResponsiveDialogContent className="sm:max-w-2xl h-[85vh] sm:h-[600px] p-0 overflow-hidden">
+          <ResponsiveDialogHeader className="sr-only">
+            <ResponsiveDialogTitle>Wybierz lokalizację na mapie</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
+              Kliknij na mapę aby wybrać lokalizację lub przeciągnij marker aby ją dopasować.
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+          <Suspense fallback={<MapLoadingSpinner />}>
+            <LocationPickerMap
+              value={tempMapLocation}
+              onChange={setTempMapLocation}
+              onConfirm={handleConfirmMapLocation}
+              onCancel={handleCancelMapPicker}
+            />
+          </Suspense>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </div>
   );
 }

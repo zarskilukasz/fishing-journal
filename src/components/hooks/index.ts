@@ -26,3 +26,6 @@ export {
   type UseEquipmentMutationsOptions,
   type UseEquipmentMutationsReturn,
 } from "./useEquipmentMutations";
+
+// Weather hooks
+export { useWeather, weatherQueryKeys, type UseWeatherOptions, type UseWeatherReturn } from "./useWeather";

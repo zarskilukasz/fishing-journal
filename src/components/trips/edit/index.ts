@@ -7,6 +7,7 @@ export { LoadingState } from "./LoadingState";
 export { ErrorState, type ErrorStateProps } from "./ErrorState";
 export { DateTimeSection, type DateTimeSectionProps } from "./DateTimeSection";
 export { LocationSection, type LocationSectionProps } from "./LocationSection";
+export { LocationPickerMap, type LocationPickerMapProps } from "./LocationPickerMap";
 export { EquipmentSection, type EquipmentSectionProps } from "./EquipmentSection";
 export { EquipmentMultiSelect, type EquipmentMultiSelectProps } from "./EquipmentMultiSelect";
 export { WeatherWarningDialog, type WeatherWarningDialogProps } from "./WeatherWarningDialog";

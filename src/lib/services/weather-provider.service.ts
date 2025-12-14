@@ -94,6 +94,31 @@ interface AccuWeatherHourlyResponse {
   };
 }
 
+/**
+ * AccuWeather Current Conditions API response type.
+ * Used to get atmospheric pressure which is not available in Hourly Forecast.
+ */
+interface AccuWeatherCurrentConditionsResponse {
+  EpochTime: number;
+  WeatherText: string;
+  WeatherIcon: number;
+  IsDayTime: boolean;
+  Temperature: {
+    Metric: { Value: number; Unit: string };
+    Imperial: { Value: number; Unit: string };
+  };
+  Pressure: {
+    Metric: { Value: number; Unit: string };
+    Imperial: { Value: number; Unit: string };
+  };
+  RelativeHumidity?: number;
+  Wind?: {
+    Speed: { Metric: { Value: number }; Imperial: { Value: number } };
+    Direction: { Degrees: number };
+  };
+  CloudCover?: number;
+}
+
 // ---------------------------------------------------------------------------
 // Weather Provider Service
 // ---------------------------------------------------------------------------
@@ -140,14 +165,29 @@ export class WeatherProviderService {
         return { data: null, error: locationResult.error };
       }
 
-      // 3. Fetch hourly weather data
-      const hoursResult = await this.fetchHourlyWeather(locationResult.data);
+      // 3. Fetch current conditions (for pressure) and hourly forecast in parallel
+      const [currentResult, hoursResult] = await Promise.all([
+        this.fetchCurrentConditions(locationResult.data),
+        this.fetchHourlyWeather(locationResult.data),
+      ]);
+
+      // 4. Get pressure from current conditions (if available)
+      const currentPressure = currentResult.data?.pressure_hpa ?? null;
+
+      // 5. Handle hourly data error
       if (hoursResult.error) {
         return { data: null, error: hoursResult.error };
       }
 
+      // 6. Merge pressure into hourly data (use current pressure for all hours if hourly doesn't have it)
+      const hoursWithPressure = hoursResult.data.map((hour) => ({
+        ...hour,
+        // Use hour's pressure if available, otherwise use current conditions pressure
+        pressure_hpa: hour.pressure_hpa ?? currentPressure,
+      }));
+
       return {
-        data: { hours: hoursResult.data },
+        data: { hours: hoursWithPressure },
         error: null,
       };
     } catch {
@@ -195,6 +235,53 @@ export class WeatherProviderService {
       return { data: data.Key, error: null };
     } finally {
       clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Fetches current conditions for a location.
+   * Used primarily to get atmospheric pressure which is not available in hourly forecast.
+   * Returns null data (not error) if fetch fails - pressure is non-critical.
+   */
+  private async fetchCurrentConditions(
+    locationKey: string
+  ): Promise<{ data: { pressure_hpa: number } | null; error: null }> {
+    const url = new URL(`${this.config.baseUrl}/currentconditions/v1/${locationKey}`);
+    url.searchParams.set("apikey", this.config.apiKey);
+    url.searchParams.set("details", "true");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+    try {
+      const response = await fetch(url.toString(), {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // If error, return null data (pressure is non-critical)
+      if (!response.ok) {
+        return { data: null, error: null };
+      }
+
+      const data = (await response.json()) as AccuWeatherCurrentConditionsResponse[];
+
+      // Current conditions returns an array, we want the first (and usually only) item
+      if (data.length > 0 && data[0].Pressure?.Metric?.Value) {
+        return {
+          data: { pressure_hpa: Math.round(data[0].Pressure.Metric.Value) },
+          error: null,
+        };
+      }
+
+      return { data: null, error: null };
+    } catch {
+      // Non-critical - return null data
+      clearTimeout(timeoutId);
+      return { data: null, error: null };
     }
   }
 

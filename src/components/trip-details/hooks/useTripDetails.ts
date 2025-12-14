@@ -77,13 +77,12 @@ async function fetchTrip(tripId: string): Promise<TripGetResponseDto> {
 }
 
 /**
- * Close a trip by setting ended_at and status to closed
+ * Close a trip by setting status to closed.
+ * Note: ended_at is NOT modified here - it can only be set through the trip edit page.
  */
-async function closeTripApi(tripId: string, endedAt: string): Promise<TripGetResponseDto> {
+async function closeTripApi(tripId: string): Promise<TripGetResponseDto> {
   const response = await fetch(`/api/v1/trips/${tripId}/close`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ended_at: endedAt }),
   });
 
   if (!response.ok) {
@@ -161,26 +160,23 @@ export function useTripDetails(tripId: string): UseTripDetailsReturn {
   const error = queryError || actionError;
 
   // Close trip action
-  const closeTrip = useCallback(
-    async (endedAt: string) => {
-      setIsClosing(true);
-      setActionError(null);
+  const closeTrip = useCallback(async () => {
+    setIsClosing(true);
+    setActionError(null);
 
-      try {
-        await closeTripApi(tripId, endedAt);
-        // Invalidate queries to refresh data
-        await queryClient.invalidateQueries({ queryKey: tripDetailsQueryKeys.detail(tripId) });
-        await queryClient.invalidateQueries({ queryKey: tripQueryKeys.all });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Nie udało się zamknąć wyprawy";
-        setActionError({ code: "close_error", message });
-        throw err;
-      } finally {
-        setIsClosing(false);
-      }
-    },
-    [tripId, queryClient]
-  );
+    try {
+      await closeTripApi(tripId);
+      // Invalidate queries to refresh data
+      await queryClient.invalidateQueries({ queryKey: tripDetailsQueryKeys.detail(tripId) });
+      await queryClient.invalidateQueries({ queryKey: tripQueryKeys.all });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Nie udało się zamknąć wyprawy";
+      setActionError({ code: "close_error", message });
+      throw err;
+    } finally {
+      setIsClosing(false);
+    }
+  }, [tripId, queryClient]);
 
   // Delete trip action
   const deleteTrip = useCallback(async () => {

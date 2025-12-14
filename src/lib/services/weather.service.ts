@@ -381,10 +381,10 @@ export const weatherService = {
     tripId: UUID,
     input: WeatherManualCommandInput
   ): Promise<ServiceResult<WeatherManualResponseDto>> {
-    // 1. Verify trip exists and user has access
+    // 1. Verify trip exists and get trip duration
     const { data: trip, error: tripError } = await supabase
       .from("trips")
-      .select("id")
+      .select("id, started_at, ended_at")
       .eq("id", tripId)
       .is("deleted_at", null)
       .maybeSingle();
@@ -405,15 +405,66 @@ export const weatherService = {
       };
     }
 
-    // 2. Create snapshot
+    // 2. Clip period to trip duration
+    const tripStartedAt = new Date(trip.started_at);
+    const tripEndedAt = trip.ended_at ? new Date(trip.ended_at) : null;
+
+    let effectivePeriodStart = new Date(input.period_start);
+    let effectivePeriodEnd = new Date(input.period_end);
+
+    // Clip period_start to trip start
+    if (effectivePeriodStart < tripStartedAt) {
+      effectivePeriodStart = tripStartedAt;
+    }
+
+    // Clip period_end to trip end (if trip is closed)
+    if (tripEndedAt && effectivePeriodEnd > tripEndedAt) {
+      effectivePeriodEnd = tripEndedAt;
+    }
+
+    // Validate that we still have a valid period after clipping
+    if (effectivePeriodEnd < effectivePeriodStart) {
+      return {
+        data: null,
+        error: {
+          code: "validation_error",
+          message: "Okres pogodowy wykracza poza czas trwania wyprawy",
+          httpStatus: 400,
+        },
+      };
+    }
+
+    const clippedPeriodStart = effectivePeriodStart.toISOString();
+    const clippedPeriodEnd = effectivePeriodEnd.toISOString();
+
+    // 3. Filter hours to only include those within trip duration
+    const filteredHours = input.hours.filter((hour) => {
+      const hourTime = new Date(hour.observed_at);
+      const isAfterStart = hourTime >= tripStartedAt;
+      const isBeforeEnd = tripEndedAt ? hourTime <= tripEndedAt : true;
+      return isAfterStart && isBeforeEnd;
+    });
+
+    if (filteredHours.length === 0) {
+      return {
+        data: null,
+        error: {
+          code: "validation_error",
+          message: "Żaden wpis godzinowy nie mieści się w czasie trwania wyprawy",
+          httpStatus: 400,
+        },
+      };
+    }
+
+    // 4. Create snapshot (using clipped period)
     const { data: snapshot, error: snapshotError } = await supabase
       .from("weather_snapshots")
       .insert({
         trip_id: tripId,
         source: "manual" as const,
         fetched_at: input.fetched_at,
-        period_start: input.period_start,
-        period_end: input.period_end,
+        period_start: clippedPeriodStart,
+        period_end: clippedPeriodEnd,
       })
       .select("id")
       .single();
@@ -423,8 +474,8 @@ export const weatherService = {
       return { data: null, error: mapped };
     }
 
-    // 3. Create hours (batch insert)
-    const hourInserts = input.hours.map((hour) => ({
+    // 5. Create hours (batch insert with filtered hours)
+    const hourInserts = filteredHours.map((hour) => ({
       snapshot_id: snapshot.id,
       observed_at: hour.observed_at,
       temperature_c: hour.temperature_c ?? null,
@@ -516,10 +567,10 @@ export const weatherService = {
     tripId: UUID,
     input: WeatherRefreshCommandInput
   ): Promise<ServiceResult<WeatherRefreshResponseDto>> {
-    // 1. Fetch trip with location data
+    // 1. Fetch trip with location data and dates
     const { data: trip, error: tripError } = await supabase
       .from("trips")
-      .select("id, location_lat, location_lng, started_at")
+      .select("id, location_lat, location_lng, started_at, ended_at")
       .eq("id", tripId)
       .is("deleted_at", null)
       .maybeSingle();
@@ -567,13 +618,47 @@ export const weatherService = {
       };
     }
 
-    // 4. Fetch weather from external provider
+    // 4. Clip period to trip duration
+    // period_start should not be before trip started_at
+    // period_end should not be after trip ended_at (if trip is closed)
+    const tripStartedAt = new Date(trip.started_at);
+    const tripEndedAt = trip.ended_at ? new Date(trip.ended_at) : null;
+
+    let effectivePeriodStart = new Date(input.period_start);
+    let effectivePeriodEnd = new Date(input.period_end);
+
+    // Clip period_start to trip start
+    if (effectivePeriodStart < tripStartedAt) {
+      effectivePeriodStart = tripStartedAt;
+    }
+
+    // Clip period_end to trip end (if trip is closed)
+    if (tripEndedAt && effectivePeriodEnd > tripEndedAt) {
+      effectivePeriodEnd = tripEndedAt;
+    }
+
+    // Validate that we still have a valid period after clipping
+    if (effectivePeriodEnd < effectivePeriodStart) {
+      return {
+        data: null,
+        error: {
+          code: "validation_error",
+          message: "Okres pogodowy wykracza poza czas trwania wyprawy",
+          httpStatus: 400,
+        },
+      };
+    }
+
+    const clippedPeriodStart = effectivePeriodStart.toISOString();
+    const clippedPeriodEnd = effectivePeriodEnd.toISOString();
+
+    // 5. Fetch weather from external provider (using clipped period)
     const weatherProvider = getWeatherProvider();
     const weatherResult = await weatherProvider.fetchWeather({
       lat: trip.location_lat,
       lng: trip.location_lng,
-      periodStart: input.period_start,
-      periodEnd: input.period_end,
+      periodStart: clippedPeriodStart,
+      periodEnd: clippedPeriodEnd,
     });
 
     if (weatherResult.error) {
@@ -588,15 +673,15 @@ export const weatherService = {
       };
     }
 
-    // 5. Create weather snapshot
+    // 6. Create weather snapshot (using clipped period)
     const { data: snapshot, error: snapshotError } = await supabase
       .from("weather_snapshots")
       .insert({
         trip_id: tripId,
         source: "api" as const,
         fetched_at: new Date().toISOString(),
-        period_start: input.period_start,
-        period_end: input.period_end,
+        period_start: clippedPeriodStart,
+        period_end: clippedPeriodEnd,
       })
       .select("id")
       .single();
@@ -606,7 +691,7 @@ export const weatherService = {
       return { data: null, error: mapped };
     }
 
-    // 6. Create weather hours (batch insert)
+    // 7. Create weather hours (batch insert)
     if (weatherResult.data.hours.length > 0) {
       const hourInserts = weatherResult.data.hours.map((hour) => ({
         snapshot_id: snapshot.id,

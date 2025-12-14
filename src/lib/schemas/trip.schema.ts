@@ -205,10 +205,9 @@ export type UpdateTripInput = z.infer<typeof updateTripSchema>;
 
 /**
  * Request body schema for closing a trip.
- * Sets status to 'closed' and requires ended_at.
+ * Sets status to 'closed'. The ended_at field is not modified here -
+ * it can only be set through the trip edit page.
  */
-export const closeTripSchema = z.object({
-  ended_at: z.string().datetime("Invalid datetime format for 'ended_at'"),
-});
+export const closeTripSchema = z.object({}).optional();
 
 export type CloseTripInput = z.infer<typeof closeTripSchema>;
