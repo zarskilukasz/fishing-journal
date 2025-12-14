@@ -1,9 +1,18 @@
 /**
  * WeatherWarningDialog - Alert dialog for date change warning.
  * Informs user that changing dates may invalidate weather data.
+ * Responsive: Drawer on mobile, Dialog on desktop.
  */
 import React from "react";
 import { Button } from "@/components/ui/button";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogFooter,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+} from "@/components/ui/responsive-dialog";
 import type { WeatherWarningDialogProps } from "./types";
 
 /**
@@ -34,50 +43,41 @@ function AlertTriangleIcon() {
  * Shows when user changes trip dates.
  */
 export function WeatherWarningDialog({ open, onConfirm, onCancel }: WeatherWarningDialogProps) {
-  if (!open) return null;
+  const handleOpenChange = React.useCallback(
+    (isOpen: boolean) => {
+      if (!isOpen) {
+        onCancel();
+      }
+    },
+    [onCancel]
+  );
 
   return (
-    <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
-
-      {/* Dialog */}
-      <div
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="weather-warning-title"
-        aria-describedby="weather-warning-description"
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 p-4"
-      >
-        <div className="bg-card border border-border rounded-lg shadow-lg p-6">
-          {/* Icon and Title */}
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/10">
-              <AlertTriangleIcon />
-            </div>
-            <div className="flex-1">
-              <h2 id="weather-warning-title" className="text-lg font-semibold text-foreground">
-                Zmiana dat wyprawy
-              </h2>
-              <p id="weather-warning-description" className="mt-2 text-sm text-muted-foreground">
-                Zmieniłeś daty wyprawy. Automatycznie pobrane dane pogodowe mogą stać się nieaktualne i zostać usunięte.
-                Czy na pewno chcesz kontynuować?
-              </p>
-            </div>
+    <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader className="flex-col items-start gap-4 sm:flex-row sm:items-start">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+            <AlertTriangleIcon />
           </div>
-
-          {/* Actions */}
-          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Anuluj
-            </Button>
-            <Button type="button" onClick={onConfirm}>
-              Kontynuuj
-            </Button>
+          <div className="flex-1">
+            <ResponsiveDialogTitle>Zmiana dat wyprawy</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription className="mt-2">
+              Zmieniłeś daty wyprawy. Automatycznie pobrane dane pogodowe mogą stać się nieaktualne i zostać usunięte.
+              Czy na pewno chcesz kontynuować?
+            </ResponsiveDialogDescription>
           </div>
-        </div>
-      </div>
-    </>
+        </ResponsiveDialogHeader>
+
+        <ResponsiveDialogFooter>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Anuluj
+          </Button>
+          <Button type="button" onClick={onConfirm}>
+            Kontynuuj
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
 

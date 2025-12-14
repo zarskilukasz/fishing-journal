@@ -1,12 +1,20 @@
 /**
  * ConfirmDialog - Confirmation dialog for dangerous actions.
- * Uses Radix UI AlertDialog pattern with Geist styling.
+ * Responsive: Drawer on mobile, Dialog on desktop.
  */
 import React from "react";
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogBody,
+  ResponsiveDialogFooter,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+  ResponsiveDialogClose,
+} from "@/components/ui/responsive-dialog";
 import type { ConfirmDialogProps } from "../types";
 
 /**
@@ -23,55 +31,33 @@ export function ConfirmDialog({
   variant = "default",
 }: ConfirmDialogProps) {
   return (
-    <AlertDialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <AlertDialogPrimitive.Portal>
-        {/* Overlay */}
-        <AlertDialogPrimitive.Overlay
-          className={cn(
-            "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
-            "data-[state=open]:animate-in data-[state=closed]:animate-out",
-            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
-          )}
-        />
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
 
-        {/* Content */}
-        <AlertDialogPrimitive.Content
-          className={cn(
-            "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2",
-            "bg-card border border-border rounded-lg shadow-lg p-6",
-            "data-[state=open]:animate-in data-[state=closed]:animate-out",
-            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-            "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
-          )}
-        >
-          <AlertDialogPrimitive.Title className="text-lg font-semibold text-foreground">
-            {title}
-          </AlertDialogPrimitive.Title>
+        <ResponsiveDialogBody>
+          <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
+        </ResponsiveDialogBody>
 
-          <AlertDialogPrimitive.Description className="mt-2 text-sm text-muted-foreground">
-            {description}
-          </AlertDialogPrimitive.Description>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogClose asChild>
+            <Button variant="outline" disabled={isLoading}>
+              Anuluj
+            </Button>
+          </ResponsiveDialogClose>
 
-          <div className="mt-6 flex justify-end gap-3">
-            <AlertDialogPrimitive.Cancel asChild>
-              <Button variant="outline" disabled={isLoading}>
-                Anuluj
-              </Button>
-            </AlertDialogPrimitive.Cancel>
-
-            <AlertDialogPrimitive.Action asChild>
-              <Button
-                variant={variant === "destructive" ? "destructive" : "default"}
-                onClick={onConfirm}
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {confirmLabel}
-              </Button>
-            </AlertDialogPrimitive.Action>
-          </div>
-        </AlertDialogPrimitive.Content>
-      </AlertDialogPrimitive.Portal>
-    </AlertDialogPrimitive.Root>
+          <Button
+            variant={variant === "destructive" ? "destructive" : "default"}
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {confirmLabel}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

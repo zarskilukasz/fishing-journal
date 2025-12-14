@@ -8,6 +8,18 @@ import { EquipmentView, type EquipmentType } from "@/components/equipment";
 
 export const prerender = false;
 
+// Get Supabase client from middleware (auth already verified in AppLayout)
+const supabase = Astro.locals.supabase;
+const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser();
+
+// Redirect if not authenticated (should not happen due to AppLayout check)
+if (error || !user) {
+  return Astro.redirect("/");
+}
+
 // Get tab from query parameter
 const tabParam = Astro.url.searchParams.get("tab");
 const validTabs: EquipmentType[] = ["rods", "lures", "groundbaits"];

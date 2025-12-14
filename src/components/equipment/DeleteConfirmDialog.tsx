@@ -1,11 +1,19 @@
 /**
  * DeleteConfirmDialog - Confirmation dialog for deleting equipment.
- * Uses Radix UI AlertDialog with Geist styling.
+ * Responsive: Drawer on mobile, Dialog on desktop.
  */
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogBody,
+  ResponsiveDialogFooter,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+  ResponsiveDialogClose,
+} from "@/components/ui/responsive-dialog";
 import type { EquipmentDto } from "./types";
 
 export interface DeleteConfirmDialogProps {
@@ -21,64 +29,43 @@ export interface DeleteConfirmDialogProps {
  */
 export function DeleteConfirmDialog({ isOpen, item, onCancel, onConfirm, isDeleting }: DeleteConfirmDialogProps) {
   return (
-    <AlertDialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && onCancel()}>
-      <AlertDialogPrimitive.Portal>
-        {/* Overlay */}
-        <AlertDialogPrimitive.Overlay
-          className={cn(
-            "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
-            "data-[state=open]:animate-in data-[state=closed]:animate-out",
-            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
-          )}
-        />
-
-        {/* Content - centered with margin for mobile */}
-        <AlertDialogPrimitive.Content
-          className={cn(
-            "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
-            "w-[calc(100%-2rem)] max-w-md",
-            "bg-card border border-border rounded-lg shadow-lg p-6",
-            "data-[state=open]:animate-in data-[state=closed]:animate-out",
-            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-            "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
-          )}
-        >
+    <ResponsiveDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader className="flex-col items-center pt-6">
           {/* Warning icon */}
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="h-6 w-6 text-destructive" aria-hidden="true" />
           </div>
+        </ResponsiveDialogHeader>
 
-          <AlertDialogPrimitive.Title className="mt-4 text-center text-lg font-semibold text-foreground">
-            Usuń &ldquo;{item?.name}&rdquo;?
-          </AlertDialogPrimitive.Title>
+        <ResponsiveDialogBody className="text-center">
+          <ResponsiveDialogTitle className="text-lg">Usuń &ldquo;{item?.name}&rdquo;?</ResponsiveDialogTitle>
 
-          <AlertDialogPrimitive.Description className="mt-2 text-center text-sm text-muted-foreground">
+          <ResponsiveDialogDescription className="mt-2">
             Element zostanie ukryty, ale zachowany w historycznych wyprawach.
-          </AlertDialogPrimitive.Description>
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogBody>
 
-          <div className="mt-6 flex justify-end gap-3">
-            <AlertDialogPrimitive.Cancel asChild>
-              <Button variant="outline" disabled={isDeleting}>
-                Anuluj
-              </Button>
-            </AlertDialogPrimitive.Cancel>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogClose asChild>
+            <Button variant="outline" disabled={isDeleting}>
+              Anuluj
+            </Button>
+          </ResponsiveDialogClose>
 
-            <AlertDialogPrimitive.Action asChild>
-              <Button
-                variant="destructive"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onConfirm();
-                }}
-                disabled={isDeleting}
-              >
-                {isDeleting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-                {isDeleting ? "Usuwanie..." : "Usuń"}
-              </Button>
-            </AlertDialogPrimitive.Action>
-          </div>
-        </AlertDialogPrimitive.Content>
-      </AlertDialogPrimitive.Portal>
-    </AlertDialogPrimitive.Root>
+          <Button
+            variant="destructive"
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
+            disabled={isDeleting}
+          >
+            {isDeleting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            {isDeleting ? "Usuwanie..." : "Usuń"}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

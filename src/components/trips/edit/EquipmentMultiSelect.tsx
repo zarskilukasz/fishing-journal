@@ -162,7 +162,7 @@ export function EquipmentMultiSelect<T extends EquipmentItem>({
         <Button
           type="button"
           variant="outline"
-          className="w-full justify-between font-normal"
+          className="w-full justify-between font-normal bg-[#ffffff]"
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
           aria-expanded={isOpen}

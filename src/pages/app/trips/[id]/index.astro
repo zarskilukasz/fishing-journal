@@ -9,6 +9,18 @@
 import AppLayout from "@/layouts/AppLayout.astro";
 import { TripDetailsView } from "@/components/trip-details";
 
+// Get Supabase client from middleware (auth already verified in AppLayout)
+const supabase = Astro.locals.supabase;
+const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser();
+
+// Redirect if not authenticated (should not happen due to AppLayout check)
+if (error || !user) {
+  return Astro.redirect("/");
+}
+
 const { id } = Astro.params;
 
 // Validate that id is present
