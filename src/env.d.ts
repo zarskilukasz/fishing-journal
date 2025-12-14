@@ -12,6 +12,10 @@ interface ImportMetaEnv {
   readonly ACCUWEATHER_API_KEY: string;
   /** AccuWeather base URL (optional, defaults to production) */
   readonly ACCUWEATHER_BASE_URL?: string;
+  /** Google Maps API key for client-side map components */
+  readonly PUBLIC_GOOGLE_MAPS_API_KEY: string;
+  /** Google Maps Map ID for styling */
+  readonly PUBLIC_GOOGLE_MAPS_MAP_ID: string;
 }
 
 interface ImportMeta {

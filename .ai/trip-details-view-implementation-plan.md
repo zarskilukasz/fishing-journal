@@ -1108,7 +1108,7 @@ interface ApiErrorResponse {
 | Załadowanie strony | - | Pobranie danych wyprawy, wyświetlenie loading skeleton |
 | Kliknięcie menu akcji | TripActionsMenu | Otwarcie dropdown z opcjami |
 | Kliknięcie "Edytuj" | MenuItem | Nawigacja do `/app/trips/{id}/edit` |
-| Kliknięcie "Zamknij wyprawę" | MenuItem | Otwarcie dialogu potwierdzenia |
+| Kliknięcie "Zakończ wyprawę" | MenuItem | Otwarcie dialogu potwierdzenia |
 | Potwierdzenie zamknięcia | ConfirmDialog | API call, aktualizacja widoku, zmiana statusu na "closed" |
 | Kliknięcie "Usuń" | MenuItem | Otwarcie dialogu potwierdzenia (destructive) |
 | Potwierdzenie usunięcia | ConfirmDialog | API call, redirect do dashboard |

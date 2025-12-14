@@ -421,7 +421,7 @@ Dziennik Wędkarski to Progressive Web App (PWA) z pełną responsywnością (RW
 │   wyprawy        │◄───────────────────┘
 │   (z połowem)    │
 └────────┬────────┘
-         │ Banner → "Zamknij wyprawę"
+         │ Banner → "Zakończ wyprawę"
          ▼
 ┌─────────────────┐
 │  8. Confirmation │

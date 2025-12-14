@@ -22,7 +22,7 @@ Ten plan opisuje implementację zestawu endpointów zarządzania **wyprawami wę
 | POST | `/api/v1/trips/quick-start` | Szybkie rozpoczęcie wyprawy |
 | GET | `/api/v1/trips/{id}` | Pobierz szczegóły wyprawy |
 | PATCH | `/api/v1/trips/{id}` | Aktualizuj wyprawę |
-| POST | `/api/v1/trips/{id}/close` | Zamknij wyprawę |
+| POST | `/api/v1/trips/{id}/close` | Zakończ wyprawę |
 | DELETE | `/api/v1/trips/{id}` | Soft-delete wyprawy |
 
 ---
