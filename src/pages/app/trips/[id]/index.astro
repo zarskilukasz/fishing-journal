@@ -2,14 +2,53 @@
 /**
  * Trip details page.
  * Displays full information about a specific fishing trip.
+ *
+ * TODO: Implement full TripDetailsView component according to trip-details-view-implementation-plan.md
  */
 import AppLayout from "@/layouts/AppLayout.astro";
 
 const { id } = Astro.params;
+
+// Validate that id is present
+if (!id) {
+  return Astro.redirect("/app");
+}
 ---
 
 <AppLayout title="Szczegóły wyprawy" showBackButton>
-  <div class="space-y-4">
-    <p class="text-muted-foreground">Szczegóły wyprawy {id} pojawią się tutaj.</p>
+  <div class="space-y-6">
+    {/* Temporary header with edit action */}
+    <div class="flex items-center justify-between">
+      <h1 class="text-xl font-semibold">Wyprawa</h1>
+      <a
+        href={`/app/trips/${id}/edit`}
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-secondary text-foreground border border-border hover:bg-card-hover hover:border-border-hover transition-colors"
+      >
+        <svg
+          class="h-4 w-4"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        Edytuj
+      </a>
+    </div>
+
+    {/* Placeholder content */}
+    <div class="geist-card p-6">
+      <p class="text-muted-foreground">
+        Pełny widok szczegółów wyprawy będzie dostępny wkrótce.
+      </p>
+      <p class="text-sm text-muted-foreground mt-2">
+        ID wyprawy: <code class="font-mono text-xs bg-secondary px-1 py-0.5 rounded">{id}</code>
+      </p>
+    </div>
   </div>
 </AppLayout>

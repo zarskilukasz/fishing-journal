@@ -11,35 +11,24 @@ export interface ActiveTripBannerProps {
 /**
  * Banner component displayed when user has an active trip.
  * Provides quick access to continue the trip.
+ * Clicking navigates to trip details page.
  */
 export const ActiveTripBanner = React.memo(function ActiveTripBanner({ trip }: ActiveTripBannerProps) {
   const locationLabel = useMemo(() => formatLocation(trip.location), [trip.location]);
   const dateLabel = useMemo(() => formatTripDate(trip.started_at), [trip.started_at]);
 
   const displayLabel = locationLabel || dateLabel;
-
-  const handleClick = () => {
-    window.location.href = `/app/trips/${trip.id}`;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleClick();
-    }
-  };
+  const tripUrl = `/app/trips/${trip.id}`;
 
   return (
-    <div
+    <a
+      href={tripUrl}
       className={cn(
-        "geist-card-glow cursor-pointer",
+        "geist-card-glow cursor-pointer block no-underline",
         "border-success/30 bg-success/5",
-        "hover:border-success/50 hover:bg-success/10"
+        "hover:border-success/50 hover:bg-success/10",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       )}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
       aria-label={`Kontynuuj aktywną wyprawę: ${displayLabel}`}
     >
       <div className="flex items-center gap-4">
@@ -65,6 +54,6 @@ export const ActiveTripBanner = React.memo(function ActiveTripBanner({ trip }: A
           <ChevronRight className="h-4 w-4 text-success" aria-hidden="true" />
         </div>
       </div>
-    </div>
+    </a>
   );
 });
