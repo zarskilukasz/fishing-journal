@@ -2,8 +2,8 @@
  * LocationPickerMap - Interactive Google Map for selecting a location.
  * Users can click on the map to place a marker or drag the marker to adjust.
  */
-import React, { useCallback, useState } from "react";
-import { APIProvider, Map, AdvancedMarker, Pin, useMap } from "@vis.gl/react-google-maps";
+import { useCallback } from "react";
+import { APIProvider, Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import { Button } from "@/components/ui/button";
 import type { MapMouseEvent } from "@vis.gl/react-google-maps";
 
@@ -36,8 +36,6 @@ function MapWithClickHandler({
   value: { lat: number; lng: number } | null;
   onChange: (location: { lat: number; lng: number }) => void;
 }) {
-  const map = useMap();
-
   const handleMapClick = useCallback(
     (event: MapMouseEvent) => {
       if (event.detail.latLng) {
@@ -52,11 +50,11 @@ function MapWithClickHandler({
   );
 
   const handleMarkerDragEnd = useCallback(
-    (event: google.maps.MapMouseEvent) => {
-      if (event.latLng) {
+    (event: MapMouseEvent) => {
+      if (event.detail.latLng) {
         onChange({
-          lat: event.latLng.lat(),
-          lng: event.latLng.lng(),
+          lat: event.detail.latLng.lat,
+          lng: event.detail.latLng.lng,
         });
       }
     },

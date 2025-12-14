@@ -60,4 +60,3 @@ describe("fish-species API", () => {
     });
   });
 });
-

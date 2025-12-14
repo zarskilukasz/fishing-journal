@@ -16,4 +16,3 @@ test.describe("Landing Page", () => {
     await expect(loginButton).toBeVisible();
   });
 });
-

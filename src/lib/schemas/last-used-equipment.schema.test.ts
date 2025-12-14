@@ -57,9 +57,7 @@ describe("last-used-equipment.schema", () => {
           { lure_id: "550e8400-e29b-41d4-a716-446655440004", lure_name_snapshot: "Przynęta 2" },
           { lure_id: "550e8400-e29b-41d4-a716-446655440005", lure_name_snapshot: "Przynęta 3" },
         ],
-        groundbaits: [
-          { groundbait_id: "550e8400-e29b-41d4-a716-446655440006", groundbait_name_snapshot: "Zanęta 1" },
-        ],
+        groundbaits: [{ groundbait_id: "550e8400-e29b-41d4-a716-446655440006", groundbait_name_snapshot: "Zanęta 1" }],
       };
       const result = lastUsedEquipmentResponseSchema.safeParse(multipleItemsResponse);
       expect(result.success).toBe(true);
@@ -159,11 +157,12 @@ describe("last-used-equipment.schema", () => {
         source_trip_id: "550e8400-e29b-41d4-a716-446655440000",
         rods: [{ rod_id: "550e8400-e29b-41d4-a716-446655440001", rod_name_snapshot: "Wędka żółta" }],
         lures: [{ lure_id: "550e8400-e29b-41d4-a716-446655440002", lure_name_snapshot: "Przynęta źródło" }],
-        groundbaits: [{ groundbait_id: "550e8400-e29b-41d4-a716-446655440003", groundbait_name_snapshot: "Zanęta ślimak" }],
+        groundbaits: [
+          { groundbait_id: "550e8400-e29b-41d4-a716-446655440003", groundbait_name_snapshot: "Zanęta ślimak" },
+        ],
       };
       const result = lastUsedEquipmentResponseSchema.safeParse(polishResponse);
       expect(result.success).toBe(true);
     });
   });
 });
-

@@ -89,4 +89,3 @@ describe("equipment-form.schema", () => {
     });
   });
 });
-

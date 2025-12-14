@@ -277,47 +277,27 @@ describe("catch-form.schema", () => {
     });
 
     it("returns undefined for valid caught_at within trip range", () => {
-      const result = validateCaughtAtInTripRange(
-        new Date("2025-12-14T12:00:00Z"),
-        tripStartedAt,
-        tripEndedAt
-      );
+      const result = validateCaughtAtInTripRange(new Date("2025-12-14T12:00:00Z"), tripStartedAt, tripEndedAt);
       expect(result).toBeUndefined();
     });
 
     it("returns error for caught_at before trip start", () => {
-      const result = validateCaughtAtInTripRange(
-        new Date("2025-12-14T06:00:00Z"),
-        tripStartedAt,
-        tripEndedAt
-      );
+      const result = validateCaughtAtInTripRange(new Date("2025-12-14T06:00:00Z"), tripStartedAt, tripEndedAt);
       expect(result).toBe("Data połowu nie może być przed rozpoczęciem wyprawy");
     });
 
     it("returns error for caught_at after trip end", () => {
-      const result = validateCaughtAtInTripRange(
-        new Date("2025-12-14T19:00:00Z"),
-        tripStartedAt,
-        tripEndedAt
-      );
+      const result = validateCaughtAtInTripRange(new Date("2025-12-14T19:00:00Z"), tripStartedAt, tripEndedAt);
       expect(result).toBe("Data połowu nie może być po zakończeniu wyprawy");
     });
 
     it("allows caught_at after trip start when no end date", () => {
-      const result = validateCaughtAtInTripRange(
-        new Date("2025-12-14T19:00:00Z"),
-        tripStartedAt,
-        null
-      );
+      const result = validateCaughtAtInTripRange(new Date("2025-12-14T19:00:00Z"), tripStartedAt, null);
       expect(result).toBeUndefined();
     });
 
     it("returns error for caught_at in the future", () => {
-      const result = validateCaughtAtInTripRange(
-        new Date("2025-12-14T22:00:00Z"),
-        tripStartedAt,
-        null
-      );
+      const result = validateCaughtAtInTripRange(new Date("2025-12-14T22:00:00Z"), tripStartedAt, null);
       expect(result).toBe("Data połowu nie może być w przyszłości");
     });
   });
@@ -454,4 +434,3 @@ describe("catch-form.schema", () => {
     });
   });
 });
-
