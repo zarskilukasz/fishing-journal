@@ -13,6 +13,15 @@ export default defineConfig({
   server: { port: 3000 },
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      alias: import.meta.env.PROD
+        ? {
+            // Use edge-compatible React DOM server for Cloudflare Workers
+            // React 19's standard server build uses MessageChannel which isn't available in Workers
+            "react-dom/server": "react-dom/server.edge",
+          }
+        : {},
+    },
     ssr: {
       // Exclude Node.js built-in modules from SSR bundle for Cloudflare Workers
       external: ["node:async_hooks"],
