@@ -33,10 +33,12 @@ export default defineConfig({
       use: { ...devices["Desktop Safari"] },
     },
   ],
-  webServer: {
-    command: "pnpm run preview",
-    url: "http://localhost:4321",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  webServer: process.env.CI
+    ? {
+        command: "pnpm run dev",
+        url: "http://localhost:4321",
+        reuseExistingServer: false,
+        timeout: 120 * 1000,
+      }
+    : undefined,
 });
