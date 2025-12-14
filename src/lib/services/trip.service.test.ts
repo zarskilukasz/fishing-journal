@@ -331,7 +331,8 @@ describe("tripService", () => {
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
       // Add storage mock for signed URLs
-      (supabase as any).storage = {
+
+      (supabase as unknown as { storage: unknown }).storage = {
         from: vi.fn().mockReturnValue({
           createSignedUrls: vi.fn().mockResolvedValue({
             data: [{ path: "photos/catch-1.jpg", signedUrl: "https://signed-url.com/photo" }],
