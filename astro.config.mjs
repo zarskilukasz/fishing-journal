@@ -31,6 +31,5 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
-    sessionKVBindingName: false, // Disable Astro sessions - using Supabase auth instead
   }),
 });

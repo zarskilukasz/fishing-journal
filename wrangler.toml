@@ -14,9 +14,8 @@ pages_build_output_dir = "./dist"
 [observability]
 enabled = true
 
-# KV Namespace binding - not needed, using Supabase auth instead of Astro sessions
-# If you need KV in the future, uncomment and configure:
-# [[kv_namespaces]]
-# binding = "SESSION"
-# id = "57b875f3732e4947be24f38217dd06ad"
+# KV Namespace binding for Astro sessions (required by @astrojs/cloudflare adapter)
+[[kv_namespaces]]
+binding = "SESSION"
+id = "57b875f3732e4947be24f38217dd06ad"
 
