@@ -71,10 +71,10 @@ export const createCatchSchema = z.object({
   caught_at: z.string().datetime("Nieprawidłowy format datetime dla caught_at"),
   /** Fish species UUID (required) */
   species_id: z.string().uuid("Nieprawidłowy format UUID dla species_id"),
-  /** Lure UUID (required, must not be soft-deleted, must belong to user - validated by DB trigger) */
-  lure_id: z.string().uuid("Nieprawidłowy format UUID dla lure_id"),
-  /** Groundbait UUID (required, must not be soft-deleted, must belong to user - validated by DB trigger) */
-  groundbait_id: z.string().uuid("Nieprawidłowy format UUID dla groundbait_id"),
+  /** Lure UUID (optional, must not be soft-deleted, must belong to user - validated by DB trigger) */
+  lure_id: z.string().uuid("Nieprawidłowy format UUID dla lure_id").nullable().optional(),
+  /** Groundbait UUID (optional, must not be soft-deleted, must belong to user - validated by DB trigger) */
+  groundbait_id: z.string().uuid("Nieprawidłowy format UUID dla groundbait_id").nullable().optional(),
   /** Weight in grams (optional, must be positive if provided) */
   weight_g: z
     .number()

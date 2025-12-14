@@ -20,6 +20,14 @@ const baseConfig = tseslint.config({
   rules: {
     "no-console": "warn",
     "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      },
+    ],
   },
 });
 
@@ -56,17 +64,19 @@ const reactConfig = tseslint.config({
   },
 });
 
-// Prettier ignores - exclude astro files since they have parsing issues with is:inline scripts
-const prettierIgnoresForAstro = {
-  ignores: ["**/*.astro"],
-  ...eslintPluginPrettier,
-};
-
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
-  prettierIgnoresForAstro
+  // Apply prettier only to non-astro files (astro has parsing issues with is:inline scripts)
+  // Exclude virtual script files inside .astro files (*.astro/*.js, *.astro/*.ts)
+  {
+    name: "prettier-non-astro",
+    files: ["**/*.{js,jsx,ts,tsx,mjs,cjs}"],
+    ignores: ["**/*.astro/*.js", "**/*.astro/*.ts"],
+    plugins: eslintPluginPrettier.plugins,
+    rules: eslintPluginPrettier.rules,
+  }
 );

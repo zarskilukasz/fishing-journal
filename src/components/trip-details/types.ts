@@ -256,7 +256,7 @@ export interface EquipmentChipsProps {
  * Props for AddCatchFAB component
  */
 export interface AddCatchFABProps {
-  tripId: string;
+  onClick: () => void;
   disabled?: boolean;
 }
 

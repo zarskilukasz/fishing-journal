@@ -124,10 +124,10 @@ export interface CatchRow {
   trip_id: UUID;
   caught_at: ISODateTime;
   species_id: UUID;
-  lure_id: UUID;
-  groundbait_id: UUID;
-  lure_name_snapshot: string;
-  groundbait_name_snapshot: string;
+  lure_id: UUID | null;
+  groundbait_id: UUID | null;
+  lure_name_snapshot: string | null;
+  groundbait_name_snapshot: string | null;
   weight_g: number | null;
   length_mm: number | null;
   photo_path: string | null;
@@ -495,8 +495,8 @@ type CatchMutableFields = Pick<
   "caught_at" | "species_id" | "lure_id" | "groundbait_id" | "weight_g" | "length_mm" | "photo_path"
 >;
 
-export type CreateCatchCommand = Pick<CatchMutableFields, "caught_at" | "species_id" | "lure_id" | "groundbait_id"> &
-  Partial<Pick<CatchMutableFields, "weight_g" | "length_mm">>;
+export type CreateCatchCommand = Pick<CatchMutableFields, "caught_at" | "species_id"> &
+  Partial<Pick<CatchMutableFields, "lure_id" | "groundbait_id" | "weight_g" | "length_mm">>;
 
 export type UpdateCatchCommand = Partial<CatchMutableFields>;
 

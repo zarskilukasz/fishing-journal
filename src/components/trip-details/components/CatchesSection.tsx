@@ -10,7 +10,7 @@ import type { CatchesSectionProps } from "../types";
 /**
  * Section displaying list of catches or empty state.
  */
-export function CatchesSection({ catches, tripId }: CatchesSectionProps) {
+export function CatchesSection({ catches, tripId: _tripId }: CatchesSectionProps) {
   const isEmpty = catches.length === 0;
 
   return (

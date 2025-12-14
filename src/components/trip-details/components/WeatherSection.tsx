@@ -11,7 +11,7 @@ import type { WeatherSectionProps } from "../types";
  * Weather section with timeline or manual input prompt.
  * TODO: Implement full WeatherTimeline component with API integration.
  */
-export function WeatherSection({ weatherCurrent, tripId }: WeatherSectionProps) {
+export function WeatherSection({ weatherCurrent, tripId: _tripId }: WeatherSectionProps) {
   // Show manual input banner if no weather data
   if (!weatherCurrent) {
     return (

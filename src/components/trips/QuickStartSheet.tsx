@@ -33,7 +33,6 @@ export function QuickStartSheet({ isOpen, onClose, onSuccess }: QuickStartSheetP
     [onSuccess]
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleError = useCallback((_error: Error, _message: string) => {
     // TODO: Show toast/snackbar with error message
   }, []);

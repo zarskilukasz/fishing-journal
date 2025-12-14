@@ -12,12 +12,14 @@ import type { AddCatchFABProps } from "../types";
  * FAB for adding a new catch to the trip.
  * Matches the size and style of the main FAB component.
  */
-export const AddCatchFAB = React.memo(function AddCatchFAB({ tripId, disabled = false }: AddCatchFABProps) {
+export const AddCatchFAB = React.memo(function AddCatchFAB({ onClick, disabled = false }: AddCatchFABProps) {
   const isExtended = useIsDesktop();
 
   return (
-    <a
-      href={`/app/trips/${tripId}/catches/new`}
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
       className={cn(
         "fixed z-40 flex items-center justify-center",
         "bg-primary text-primary-foreground",
@@ -30,10 +32,9 @@ export const AddCatchFAB = React.memo(function AddCatchFAB({ tripId, disabled = 
         disabled && "pointer-events-none opacity-50"
       )}
       aria-label={!isExtended ? "Dodaj połów" : undefined}
-      aria-disabled={disabled}
     >
       <Plus className={cn("shrink-0", isExtended ? "h-4 w-4" : "h-5 w-5")} aria-hidden="true" />
       {isExtended && <span className="text-sm font-medium">Dodaj połów</span>}
-    </a>
+    </button>
   );
 });
