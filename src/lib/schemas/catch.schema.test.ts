@@ -299,18 +299,18 @@ describe("catch.schema", () => {
         expect(result.success).toBe(false);
       });
 
-      it("rejects missing lure_id", () => {
+      it("accepts missing lure_id (optional)", () => {
         const { lure_id: _, ...input } = validCreateInput;
         void _;
         const result = createCatchSchema.safeParse(input);
-        expect(result.success).toBe(false);
+        expect(result.success).toBe(true);
       });
 
-      it("rejects missing groundbait_id", () => {
+      it("accepts missing groundbait_id (optional)", () => {
         const { groundbait_id: _, ...input } = validCreateInput;
         void _;
         const result = createCatchSchema.safeParse(input);
-        expect(result.success).toBe(false);
+        expect(result.success).toBe(true);
       });
     });
 

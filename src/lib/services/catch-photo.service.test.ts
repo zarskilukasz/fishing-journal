@@ -268,14 +268,10 @@ describe("catchPhotoService", () => {
       expect(result.error).toBeNull();
       expect(result.data?.path).toBe(`${validUserId}/${validCatchId}.webp`);
       expect(supabase.storage.from).toHaveBeenCalledWith("catch-photos");
-      expect(supabase._mockStorage.upload).toHaveBeenCalledWith(
-        `${validUserId}/${validCatchId}.webp`,
-        buffer,
-        expect.objectContaining({
-          contentType: "image/webp",
-          upsert: true,
-        })
-      );
+      expect(supabase._mockStorage.upload).toHaveBeenCalledWith(`${validUserId}/${validCatchId}.webp`, buffer, {
+        contentType: "image/webp",
+        upsert: false,
+      });
     });
 
     it("returns error when upload fails", async () => {
