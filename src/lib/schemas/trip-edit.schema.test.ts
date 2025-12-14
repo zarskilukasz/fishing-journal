@@ -203,10 +203,7 @@ describe("trip-edit.schema", () => {
     it("accepts multiple valid UUIDs in equipment arrays", () => {
       const data = {
         ...validData,
-        selectedRodIds: [
-          "550e8400-e29b-41d4-a716-446655440001",
-          "550e8400-e29b-41d4-a716-446655440002",
-        ],
+        selectedRodIds: ["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"],
         selectedLureIds: [
           "550e8400-e29b-41d4-a716-446655440003",
           "550e8400-e29b-41d4-a716-446655440004",
@@ -267,4 +264,3 @@ describe("trip-edit.schema", () => {
     });
   });
 });
-

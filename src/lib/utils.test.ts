@@ -48,7 +48,7 @@ describe("cn (class name utility)", () => {
       "base-class",
       ["array-class-1", "array-class-2"],
       { "object-class": true, "ignored-class": false },
-      true && "conditional-class"
+      "conditional-class"
     );
     expect(result).toBe("base-class array-class-1 array-class-2 object-class conditional-class");
   });
@@ -68,4 +68,3 @@ describe("cn (class name utility)", () => {
     expect(result).toBe("btn btn-primary");
   });
 });
-

@@ -131,4 +131,3 @@ describe("trips API", () => {
     });
   });
 });
-
