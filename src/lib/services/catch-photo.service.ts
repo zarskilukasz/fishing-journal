@@ -194,12 +194,24 @@ export const catchPhotoService = {
   ): Promise<ServiceResult<{ path: string }>> {
     const path = `${userId}/${catchId}.webp`;
 
+    // First try to delete existing file (RLS blocks UPDATE, so we do DELETE + INSERT)
+    // Ignore errors - file might not exist
+    await supabase.storage.from(CATCH_PHOTOS_BUCKET).remove([path]);
+
+    // Then upload the new file
     const { error } = await supabase.storage.from(CATCH_PHOTOS_BUCKET).upload(path, buffer, {
       contentType: "image/webp",
-      upsert: true, // Overwrite if exists
+      upsert: false, // Don't use upsert - RLS blocks UPDATE operations
     });
 
     if (error) {
+      console.error("[catch-photo.service] Storage upload error:", {
+        path,
+        bucket: CATCH_PHOTOS_BUCKET,
+        error: error.message,
+        statusCode: error.statusCode,
+        name: error.name,
+      });
       return {
         data: null,
         error: {

@@ -84,10 +84,13 @@ export function CatchCard({ catch: catchItem }: CatchCardProps) {
           )}
         </div>
 
-        <p className="text-xs text-muted-foreground mt-1 truncate">
-          {catchItem.lure.name_snapshot}
-          {catchItem.groundbait.name_snapshot && ` • ${catchItem.groundbait.name_snapshot}`}
-        </p>
+        {(catchItem.lure.name_snapshot || catchItem.groundbait.name_snapshot) && (
+          <p className="text-xs text-muted-foreground mt-1 truncate">
+            {catchItem.lure.name_snapshot}
+            {catchItem.lure.name_snapshot && catchItem.groundbait.name_snapshot && " • "}
+            {catchItem.groundbait.name_snapshot}
+          </p>
+        )}
       </div>
     </a>
   );

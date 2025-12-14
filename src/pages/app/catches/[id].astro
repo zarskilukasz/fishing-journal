@@ -1,0 +1,23 @@
+---
+/**
+ * Catch details page.
+ * Displays full information about a specific catch.
+ *
+ * Route: /app/catches/[id]
+ * Access: Requires authentication (owner of the catch via trip ownership)
+ */
+import AppLayout from "@/layouts/AppLayout.astro";
+import { CatchDetailView } from "@/components/catch-detail";
+
+const { id } = Astro.params;
+
+// Validate that id is present
+if (!id) {
+  return Astro.redirect("/app");
+}
+---
+
+<AppLayout title="Szczegóły połowu" showBackButton>
+  <CatchDetailView client:load catchId={id} />
+</AppLayout>
+

@@ -110,10 +110,10 @@ export const updateCatchSchema = z
     caught_at: z.string().datetime("Nieprawidłowy format datetime dla caught_at").optional(),
     /** Fish species UUID */
     species_id: z.string().uuid("Nieprawidłowy format UUID dla species_id").optional(),
-    /** Lure UUID (must not be soft-deleted, must belong to user - validated by DB trigger) */
-    lure_id: z.string().uuid("Nieprawidłowy format UUID dla lure_id").optional(),
-    /** Groundbait UUID (must not be soft-deleted, must belong to user - validated by DB trigger) */
-    groundbait_id: z.string().uuid("Nieprawidłowy format UUID dla groundbait_id").optional(),
+    /** Lure UUID (can be null to clear, must not be soft-deleted, must belong to user - validated by DB trigger) */
+    lure_id: z.string().uuid("Nieprawidłowy format UUID dla lure_id").nullable().optional(),
+    /** Groundbait UUID (can be null to clear, must not be soft-deleted, must belong to user - validated by DB trigger) */
+    groundbait_id: z.string().uuid("Nieprawidłowy format UUID dla groundbait_id").nullable().optional(),
     /** Weight in grams (can be set to null to clear) */
     weight_g: z
       .number()

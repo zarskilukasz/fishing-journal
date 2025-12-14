@@ -10,10 +10,12 @@ import type {
   QuickStartTripResponseDto,
   TripEquipmentDto,
   WeatherSnapshotSource,
+  CatchInTripDto,
 } from "@/types";
 import type { TripListQuery, CreateTripInput, UpdateTripInput, TripIncludeValue } from "@/lib/schemas/trip.schema";
 import { encodeCursor, decodeCursor } from "@/lib/api/pagination";
 import { mapSupabaseError, type MappedError } from "@/lib/errors/supabase-error-mapper";
+import { CATCH_PHOTOS_BUCKET, SIGNED_URL_EXPIRES_IN } from "@/lib/schemas/catch-photo.schema";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -306,7 +308,8 @@ export const tripService = {
 
     // Add catches if requested
     if (includeCatches && tripData.catches) {
-      response.catches = tripData.catches.map((c) => ({
+      // Map catches to DTOs first
+      const mappedCatches: CatchInTripDto[] = tripData.catches.map((c) => ({
         id: c.id,
         caught_at: c.caught_at,
         species: {
@@ -328,6 +331,34 @@ export const tripService = {
           url: null,
         },
       }));
+
+      // Generate signed URLs for catches with photos
+      const catchesWithPhotos = mappedCatches.filter((c) => c.photo.path !== null);
+      if (catchesWithPhotos.length > 0) {
+        const photoPaths = catchesWithPhotos.map((c) => c.photo.path as string);
+        const { data: signedUrls } = await supabase.storage
+          .from(CATCH_PHOTOS_BUCKET)
+          .createSignedUrls(photoPaths, SIGNED_URL_EXPIRES_IN);
+
+        if (signedUrls) {
+          // Create a map of path -> signed URL
+          const urlMap = new Map<string, string>();
+          signedUrls.forEach((result) => {
+            if (!result.error && result.signedUrl) {
+              urlMap.set(result.path, result.signedUrl);
+            }
+          });
+
+          // Assign URLs to catches
+          mappedCatches.forEach((c) => {
+            if (c.photo.path && urlMap.has(c.photo.path)) {
+              c.photo.url = urlMap.get(c.photo.path) ?? null;
+            }
+          });
+        }
+      }
+
+      response.catches = mappedCatches;
     }
 
     // Add weather if requested

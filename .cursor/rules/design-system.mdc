@@ -294,6 +294,50 @@ active:scale-[0.97]  /* subtelne wciśnięcie */
 </button>
 ```
 
+## Dialogi i Modale
+
+### Centrowanie dialogu (Radix UI)
+
+Dialogi muszą być wyśrodkowane na ekranie z marginesem na mobile:
+
+```tsx
+<AlertDialogPrimitive.Content
+  className={cn(
+    // Centrowanie: left-1/2 + -translate-x-1/2
+    "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
+    // Szerokość z marginesem na mobile
+    "w-[calc(100%-2rem)] max-w-md",
+    // Styling
+    "bg-card border border-border rounded-lg shadow-lg p-6",
+    // Animacje
+    "data-[state=open]:animate-in data-[state=closed]:animate-out",
+    "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+    "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+  )}
+>
+```
+
+### Overlay (tło)
+
+```tsx
+<AlertDialogPrimitive.Overlay
+  className={cn(
+    "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
+    "data-[state=open]:animate-in data-[state=closed]:animate-out",
+    "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+  )}
+/>
+```
+
+### Przyciski w dialogu
+
+```tsx
+<div className="mt-6 flex justify-end gap-3">
+  <Button variant="outline">Anuluj</Button>
+  <Button variant="destructive">Usuń</Button>
+</div>
+```
+
 ## Język
 
 - Cały interfejs w języku polskim
