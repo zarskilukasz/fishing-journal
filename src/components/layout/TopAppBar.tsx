@@ -29,11 +29,7 @@ export const TopAppBar = React.memo(function TopAppBar({
 }: TopAppBarProps) {
   return (
     <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 h-14",
-        "glass border-b",
-        "flex items-center justify-between px-4"
-      )}
+      className={cn("fixed top-0 left-0 right-0 z-50 h-14", "glass border-b", "flex items-center justify-between px-4")}
       role="banner"
     >
       {/* Left section: Back button + Title */}
@@ -44,11 +40,7 @@ export const TopAppBar = React.memo(function TopAppBar({
 
       {/* Center section: Navigation (desktop only) */}
       {!isMobile && (
-        <nav
-          className="flex items-center gap-1"
-          role="navigation"
-          aria-label="Nawigacja główna"
-        >
+        <nav className="flex items-center gap-1" role="navigation" aria-label="Nawigacja główna">
           {NAVIGATION_ITEMS.map((item) => (
             <NavItem
               key={item.section}

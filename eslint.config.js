@@ -56,11 +56,17 @@ const reactConfig = tseslint.config({
   },
 });
 
+// Prettier ignores - exclude astro files since they have parsing issues with is:inline scripts
+const prettierIgnoresForAstro = {
+  ignores: ["**/*.astro"],
+  ...eslintPluginPrettier,
+};
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
-  eslintPluginPrettier
+  prettierIgnoresForAstro
 );

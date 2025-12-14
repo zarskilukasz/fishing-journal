@@ -46,9 +46,7 @@ export function AppLayoutClient({
       />
 
       {/* Main content area */}
-      <ContentContainer hasBottomNav={isMobile}>
-        {children}
-      </ContentContainer>
+      <ContentContainer hasBottomNav={isMobile}>{children}</ContentContainer>
 
       {/* FAB - optional */}
       {showFAB && <FAB label={fabLabel} href={fabHref} isExtended={isDesktop} />}

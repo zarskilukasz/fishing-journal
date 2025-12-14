@@ -10,9 +10,7 @@ export interface NavigationRailProps {
  * Navigation rail - Geist style
  * Desktop only (>=768px)
  */
-export const NavigationRail = React.memo(function NavigationRail({
-  activeSection,
-}: NavigationRailProps) {
+export const NavigationRail = React.memo(function NavigationRail({ activeSection }: NavigationRailProps) {
   return (
     <nav
       className="fixed left-0 top-14 bottom-0 z-40 w-16 bg-background border-r border-border flex flex-col items-center py-4 gap-2"

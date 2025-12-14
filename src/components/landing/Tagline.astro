@@ -4,15 +4,9 @@ interface Props {
   class?: string;
 }
 
-const { text = "Twój osobisty asystent wędkarski", class: className } =
-  Astro.props;
+const { text = "Twój osobisty asystent wędkarski", class: className } = Astro.props;
 ---
 
-<p
-  class:list={[
-    "max-w-md text-center text-base text-muted-foreground leading-relaxed",
-    className,
-  ]}
->
+<p class:list={["max-w-md text-center text-base text-muted-foreground leading-relaxed", className]}>
   {text}
 </p>

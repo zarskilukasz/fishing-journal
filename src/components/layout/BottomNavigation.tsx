@@ -10,9 +10,7 @@ export interface BottomNavigationProps {
  * Bottom navigation bar - Geist style with glass effect
  * Mobile only (<768px)
  */
-export const BottomNavigation = React.memo(function BottomNavigation({
-  activeSection,
-}: BottomNavigationProps) {
+export const BottomNavigation = React.memo(function BottomNavigation({ activeSection }: BottomNavigationProps) {
   return (
     <nav
       className="fixed bottom-0 inset-x-0 z-50 h-16 glass border-t flex items-center justify-around px-2 safe-area-bottom"

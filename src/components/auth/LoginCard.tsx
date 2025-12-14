@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createSupabaseBrowserClient } from "@/db/supabase.browser";
-import {
-  loginSchema,
-  type LoginFormData,
-  type LoginFormErrors,
-} from "./schemas/login.schema";
+import { loginSchema, type LoginFormData, type LoginFormErrors } from "./schemas/login.schema";
 import { mapAuthError } from "./utils/auth-error-mapper";
 
 interface LoginCardProps {
@@ -80,13 +76,12 @@ export function LoginCard({ redirectTo = "/app" }: LoginCardProps) {
     }
   };
 
-  const handleInputChange =
-    (field: keyof LoginFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
-      }
-    };
+  const handleInputChange = (field: keyof LoginFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
 
   return (
     <div className="w-full max-w-sm">
@@ -104,12 +99,8 @@ export function LoginCard({ redirectTo = "/app" }: LoginCardProps) {
               <Fish className="h-6 w-6" />
             </a>
             <div className="text-center">
-              <h1 className="text-xl font-semibold text-foreground">
-                Zaloguj się
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Witaj z powrotem
-              </p>
+              <h1 className="text-xl font-semibold text-foreground">Zaloguj się</h1>
+              <p className="mt-1 text-sm text-muted-foreground">Witaj z powrotem</p>
             </div>
           </div>
 
@@ -168,12 +159,7 @@ export function LoginCard({ redirectTo = "/app" }: LoginCardProps) {
             </div>
 
             {/* Submit */}
-            <Button
-              type="submit"
-              size="lg"
-              disabled={isSubmitting}
-              className="w-full"
-            >
+            <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
               {isSubmitting ? "Logowanie..." : "Zaloguj się"}
             </Button>
           </form>

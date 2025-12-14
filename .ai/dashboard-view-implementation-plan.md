@@ -4,7 +4,7 @@
 
 Dashboard (Ekran główny) to centralny widok aplikacji Dziennik Wędkarski, dostępny dla zalogowanych użytkowników. Głównym celem jest prezentacja listy ostatnich wypraw wędkarskich posortowanych chronologicznie oraz zapewnienie szybkiego dostępu do tworzenia nowej wyprawy poprzez przycisk FAB (Floating Action Button).
 
-Widok realizuje wymagania z user story US-007 (Przegląd historii wypraw), prezentując podsumowanie każdej wyprawy z liczbą połowów. Dashboard działa w trybie responsywnym (RWD) z różnym układem nawigacji dla urządzeń mobilnych (BottomNavigation) i desktopowych (NavigationRail).
+Widok realizuje wymagania z user story US-007 (Przegląd historii wypraw), prezentując podsumowanie każdej wyprawy z liczbą połowów. Dashboard działa w trybie responsywnym (RWD) z różnym układem nawigacji dla urządzeń mobilnych (BottomNavigation) i desktopowych (menu nawigacyjne w TopAppBar).
 
 ## 2. Routing widoku
 
@@ -22,8 +22,8 @@ DashboardPage (Astro)
 └── AppLayout
     ├── TopAppBar
     │   ├── AppLogo
+    │   ├── NavigationMenu (desktop, ≥840px)
     │   └── UserAvatarMenu
-    ├── NavigationRail (desktop, ≥840px)
     ├── MainContent
     │   ├── ActiveTripBanner (warunkowy - gdy istnieje aktywna wyprawa)
     │   └── TripListSection
@@ -53,10 +53,9 @@ DashboardPage (Astro)
 
 ### 4.2 AppLayout
 
-- **Opis**: Wrapper layoutu dla wszystkich stron w strefie `/app`. Zawiera nawigację główną (TopAppBar, BottomNavigation/NavigationRail) oraz slot na zawartość.
+- **Opis**: Wrapper layoutu dla wszystkich stron w strefie `/app`. Zawiera nawigację główną (TopAppBar z menu nawigacyjnym dla desktop, BottomNavigation dla mobile) oraz slot na zawartość.
 - **Główne elementy**:
-  - `<TopAppBar />` - nagłówek
-  - `<NavigationRail />` - nawigacja boczna (desktop)
+  - `<TopAppBar />` - nagłówek z menu nawigacyjnym (desktop)
   - `<main>` - kontener treści
   - `<BottomNavigation />` - nawigacja dolna (mobile)
 - **Obsługiwane interakcje**: 
@@ -73,12 +72,14 @@ DashboardPage (Astro)
 
 ### 4.3 TopAppBar
 
-- **Opis**: Nagłówek aplikacji w stylu Material Design 3 z logo i menu użytkownika.
+- **Opis**: Nagłówek aplikacji w stylu Geist Design System z logo, menu nawigacyjnym (desktop) i menu użytkownika.
 - **Główne elementy**:
   - Logo/nazwa aplikacji
+  - `<NavigationMenu />` - linki nawigacyjne (tylko desktop ≥840px)
   - `<UserAvatarMenu />` - avatar z rozwijanym menu
 - **Obsługiwane interakcje**:
   - Kliknięcie logo → nawigacja do `/app`
+  - Kliknięcie elementu nawigacji → nawigacja do odpowiedniej strony
   - Kliknięcie avatar → otwarcie menu
   - Kliknięcie "Wyloguj" w menu → wylogowanie
 - **Obsługiwana walidacja**: Brak
@@ -87,28 +88,11 @@ DashboardPage (Astro)
   ```typescript
   interface TopAppBarProps {
     user: SessionUserDto;
+    activeNavItem?: "trips" | "equipment" | "profile";
   }
   ```
 
-### 4.4 NavigationRail
-
-- **Opis**: Nawigacja boczna dla ekranów desktopowych (≥840px) zgodna z MD3 Navigation Rail.
-- **Główne elementy**:
-  - Ikona + label "Wyprawy" (aktywna na dashboardzie)
-  - Ikona + label "Sprzęt"
-  - Ikona + label "Profil"
-- **Obsługiwane interakcje**:
-  - Kliknięcie elementu → nawigacja do odpowiedniej strony
-- **Obsługiwana walidacja**: Brak
-- **Typy**: Brak
-- **Propsy**:
-  ```typescript
-  interface NavigationRailProps {
-    activeItem: "trips" | "equipment" | "profile";
-  }
-  ```
-
-### 4.5 BottomNavigation
+### 4.4 BottomNavigation
 
 - **Opis**: Nawigacja dolna dla urządzeń mobilnych (<840px) zgodna z MD3 Navigation Bar.
 - **Główne elementy**:
@@ -126,7 +110,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.6 ActiveTripBanner
+### 4.5 ActiveTripBanner
 
 - **Opis**: Banner MD3 wyświetlany gdy użytkownik ma aktywną wyprawę (status="active"). Umożliwia szybki dostęp do trwającej wyprawy.
 - **Główne elementy**:
@@ -144,7 +128,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.7 TripListSection
+### 4.6 TripListSection
 
 - **Opis**: Sekcja zawierająca listę wypraw lub stan pusty. Zarządza logiką pobierania danych i stanami ładowania.
 - **Główne elementy**:
@@ -154,7 +138,7 @@ DashboardPage (Astro)
 - **Typy**: `TripListItemDto[]`, `PageInfo`
 - **Propsy**: Brak (używa hooka `useTripList`)
 
-### 4.8 TripList
+### 4.7 TripList
 
 - **Opis**: Lista kart wypraw z obsługą paginacji. Na mobile używa infinite scroll, na desktop pokazuje przycisk "Załaduj więcej".
 - **Główne elementy**:
@@ -179,7 +163,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.9 TripCard
+### 4.8 TripCard
 
 - **Opis**: Pojedyncza karta wyprawy w stylu MD3 Filled Card. Wyświetla podsumowanie wyprawy: datę, lokalizację, liczbę połowów i status.
 - **Główne elementy**:
@@ -200,7 +184,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.10 TripCardSkeleton
+### 4.9 TripCardSkeleton
 
 - **Opis**: Skeleton loading dla karty wyprawy, zachowujący jej wymiary.
 - **Główne elementy**:
@@ -210,7 +194,7 @@ DashboardPage (Astro)
 - **Typy**: Brak
 - **Propsy**: Brak
 
-### 4.11 EmptyState
+### 4.10 EmptyState
 
 - **Opis**: Stan pusty wyświetlany gdy użytkownik nie ma żadnych wypraw. Zawiera ilustrację i zachęcający komunikat z CTA.
 - **Główne elementy**:
@@ -229,7 +213,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.12 QuickStartFAB
+### 4.11 QuickStartFAB
 
 - **Opis**: Extended FAB w prawym dolnym rogu ekranu do szybkiego rozpoczęcia nowej wyprawy.
 - **Główne elementy**:
@@ -246,7 +230,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.13 QuickStartSheet
+### 4.12 QuickStartSheet
 
 - **Opis**: Modal (Bottom Sheet na mobile, Dialog na desktop) z opcjami szybkiego rozpoczęcia wyprawy.
 - **Główne elementy**:
@@ -270,7 +254,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.14 LoadMoreButton
+### 4.13 LoadMoreButton
 
 - **Opis**: Przycisk do ładowania kolejnej strony wyników (desktop).
 - **Główne elementy**:
@@ -289,7 +273,7 @@ DashboardPage (Astro)
   }
   ```
 
-### 4.15 InfiniteScrollTrigger
+### 4.14 InfiniteScrollTrigger
 
 - **Opis**: Niewidoczny element na końcu listy używający IntersectionObserver do triggerowania paginacji.
 - **Główne elementy**:
@@ -729,7 +713,7 @@ const quickStartTrip = async (
 
 ### 8.7 Nawigacja główna
 
-1. Użytkownik klika element nawigacji (BottomNavigation lub NavigationRail)
+1. Użytkownik klika element nawigacji (BottomNavigation na mobile lub menu w TopAppBar na desktop)
 2. Nawigacja do odpowiedniej strony (`/app`, `/app/equipment`, `/app/profile`)
 
 ## 9. Warunki i walidacja
@@ -810,7 +794,6 @@ src/
 │   ├── layout/
 │   │   ├── AppLayout.tsx
 │   │   ├── TopAppBar.tsx
-│   │   ├── NavigationRail.tsx
 │   │   ├── BottomNavigation.tsx
 │   │   └── UserAvatarMenu.tsx
 │   ├── trips/
@@ -865,10 +848,9 @@ src/
 
 ### Krok 5: Implementacja komponentów layoutu
 
-1. `TopAppBar` - z logo i UserAvatarMenu
-2. `NavigationRail` - nawigacja desktop
-3. `BottomNavigation` - nawigacja mobile
-4. `AppLayout` - wrapper łączący powyższe
+1. `TopAppBar` - z logo, menu nawigacyjnym (desktop) i UserAvatarMenu
+2. `BottomNavigation` - nawigacja mobile
+3. `AppLayout` - wrapper łączący powyższe
 
 ### Krok 6: Implementacja komponentów listy wypraw
 

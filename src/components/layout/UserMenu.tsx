@@ -64,10 +64,7 @@ export const UserMenu = React.memo(function UserMenu({ email }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={handleLogout}
-          className="text-destructive focus:text-destructive cursor-pointer"
-        >
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Wyloguj się</span>
         </DropdownMenuItem>

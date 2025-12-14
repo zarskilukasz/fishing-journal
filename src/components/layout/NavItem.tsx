@@ -22,13 +22,7 @@ export interface NavItemProps {
  * Navigation item component - Geist style
  * Used in both BottomNavigation and NavigationRail
  */
-export const NavItem = React.memo(function NavItem({
-  icon,
-  label,
-  href,
-  isActive,
-  variant,
-}: NavItemProps) {
+export const NavItem = React.memo(function NavItem({ icon, label, href, isActive, variant }: NavItemProps) {
   const Icon = iconMap[icon];
 
   if (variant === "bottom") {
@@ -39,9 +33,7 @@ export const NavItem = React.memo(function NavItem({
           "flex flex-col items-center justify-center gap-1",
           "min-w-[64px] py-2 px-3 rounded-lg",
           "transition-colors duration-200",
-          isActive
-            ? "text-primary"
-            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
         )}
         aria-current={isActive ? "page" : undefined}
       >
@@ -60,9 +52,7 @@ export const NavItem = React.memo(function NavItem({
           "py-2 px-3 rounded-lg",
           "text-sm font-medium",
           "transition-colors duration-200",
-          isActive
-            ? "text-primary bg-primary/10"
-            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
         )}
         aria-current={isActive ? "page" : undefined}
       >
@@ -80,9 +70,7 @@ export const NavItem = React.memo(function NavItem({
         "flex flex-col items-center justify-center gap-1",
         "w-full py-3 px-2 rounded-lg",
         "transition-all duration-200",
-        isActive
-          ? "text-primary bg-primary/10"
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+        isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
       )}
       aria-current={isActive ? "page" : undefined}
     >

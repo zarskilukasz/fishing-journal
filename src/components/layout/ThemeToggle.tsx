@@ -11,9 +11,7 @@ export interface ThemeToggleProps {
  * Theme toggle button component
  * Switches between light and dark mode with sun/moon icons
  */
-export const ThemeToggle = React.memo(function ThemeToggle({
-  className,
-}: ThemeToggleProps) {
+export const ThemeToggle = React.memo(function ThemeToggle({ className }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -32,20 +30,15 @@ export const ThemeToggle = React.memo(function ThemeToggle({
       <Sun
         className={cn(
           "h-4 w-4 transition-all duration-300",
-          theme === "dark"
-            ? "rotate-0 scale-100 opacity-100"
-            : "rotate-90 scale-0 opacity-0"
+          theme === "dark" ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"
         )}
       />
       <Moon
         className={cn(
           "absolute h-4 w-4 transition-all duration-300",
-          theme === "light"
-            ? "rotate-0 scale-100 opacity-100"
-            : "-rotate-90 scale-0 opacity-0"
+          theme === "light" ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
         )}
       />
     </button>
   );
 });
-

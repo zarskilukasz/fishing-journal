@@ -47,10 +47,7 @@ export function useTheme() {
     // Update theme-color meta tag
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute(
-        "content",
-        theme === "dark" ? "#000000" : "#ffffff"
-      );
+      metaThemeColor.setAttribute("content", theme === "dark" ? "#000000" : "#ffffff");
     }
   }, [theme]);
 
@@ -70,4 +67,3 @@ export function useTheme() {
     isLight: theme === "light",
   };
 }
-

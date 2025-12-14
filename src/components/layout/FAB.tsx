@@ -13,12 +13,7 @@ export interface FABProps {
  * Floating Action Button - Geist style
  * Primary action with glow effect on hover
  */
-export const FAB = React.memo(function FAB({
-  label,
-  href,
-  onClick,
-  isExtended,
-}: FABProps) {
+export const FAB = React.memo(function FAB({ label, href, onClick, isExtended }: FABProps) {
   const className = cn(
     "fixed z-40 flex items-center justify-center",
     "bg-primary text-primary-foreground",
@@ -27,9 +22,7 @@ export const FAB = React.memo(function FAB({
     "active:scale-[0.97]",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     // Position
-    isExtended
-      ? "bottom-6 right-6 h-10 px-4 rounded-lg gap-2"
-      : "bottom-20 right-4 h-12 w-12 rounded-xl"
+    isExtended ? "bottom-6 right-6 h-10 px-4 rounded-lg gap-2" : "bottom-20 right-4 h-12 w-12 rounded-xl"
   );
 
   const content = (
@@ -41,23 +34,14 @@ export const FAB = React.memo(function FAB({
 
   if (href) {
     return (
-      <a
-        href={href}
-        className={className}
-        aria-label={!isExtended ? label : undefined}
-      >
+      <a href={href} className={className} aria-label={!isExtended ? label : undefined}>
         {content}
       </a>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={className}
-      aria-label={!isExtended ? label : undefined}
-    >
+    <button type="button" onClick={onClick} className={className} aria-label={!isExtended ? label : undefined}>
       {content}
     </button>
   );
