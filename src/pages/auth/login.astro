@@ -5,12 +5,7 @@ import { LoginCard } from "@/components/auth/LoginCard";
 // Sprawdzenie autentykacji - zalogowani użytkownicy są przekierowywani do /app
 const {
   data: { user },
-  error,
 } = await Astro.locals.supabase.auth.getUser();
-
-if (error) {
-  console.error("Auth check failed:", error.message);
-}
 
 if (user) {
   return Astro.redirect("/app");
@@ -25,4 +20,3 @@ const redirectTo = Astro.url.searchParams.get("redirect") || "/app";
     <LoginCard client:load redirectTo={redirectTo} />
   </main>
 </AuthLayout>
-

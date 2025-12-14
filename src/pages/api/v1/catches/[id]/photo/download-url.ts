@@ -71,4 +71,3 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
   return createSuccessResponse(response);
 };
-

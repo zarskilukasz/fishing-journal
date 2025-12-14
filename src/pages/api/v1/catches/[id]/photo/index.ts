@@ -1,11 +1,7 @@
 import type { APIRoute } from "astro";
 import { catchPhotoService } from "@/lib/services/catch-photo.service";
 import { catchIdParamSchema, isAllowedContentType, isFileSizeValid } from "@/lib/schemas/catch-photo.schema";
-import {
-  createErrorResponse,
-  createCreatedResponse,
-  createNoContentResponse,
-} from "@/lib/api/error-response";
+import { createErrorResponse, createCreatedResponse, createNoContentResponse } from "@/lib/api/error-response";
 import type { CatchPhotoUploadResponseDto } from "@/types";
 
 /**
@@ -157,11 +153,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   }
 
   // 4. Delete photo (from storage and database)
-  const deleteResult = await catchPhotoService.deletePhoto(
-    supabase,
-    catchId,
-    ownershipResult.data.photoPath
-  );
+  const deleteResult = await catchPhotoService.deletePhoto(supabase, catchId, ownershipResult.data.photoPath);
 
   if (deleteResult.error) {
     return createErrorResponse(deleteResult.error.code, deleteResult.error.message, deleteResult.error.httpStatus);
@@ -170,4 +162,3 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   // 5. Return 204 No Content
   return createNoContentResponse();
 };
-

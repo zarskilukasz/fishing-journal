@@ -16,11 +16,36 @@ const { title = "Logowanie | Dziennik Wędkarski", description = "Zaloguj się d
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <!-- Strony auth nie powinny być indeksowane przez wyszukiwarki -->
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#ffffff" />
     <title>{title}</title>
+    <!-- Theme initialization script - runs before rendering to prevent flash -->
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+          document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#000000");
+        }
+      })();
+    </script>
   </head>
-  <body class="min-h-screen bg-background">
+  <body class="min-h-screen bg-background text-foreground">
+    <!-- Komunikat dla użytkowników bez JavaScript -->
+    <noscript>
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-background p-4">
+        <div class="max-w-sm rounded-xl border border-destructive/50 bg-destructive/10 p-6 text-center">
+          <h2 class="mb-2 text-lg font-medium text-destructive">JavaScript wymagany</h2>
+          <p class="text-sm text-muted-foreground">
+            Ta strona wymaga włączonego JavaScript do prawidłowego działania. Włącz JavaScript w ustawieniach
+            przeglądarki i odśwież stronę.
+          </p>
+        </div>
+      </div>
+    </noscript>
     <slot />
   </body>
 </html>

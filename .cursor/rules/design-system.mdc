@@ -1,658 +1,297 @@
 ---
-description: Zasady stylu graficznego dla Dziennika Wędkarskiego - Material Design 3
-globs: 
-  - "src/components/**/*"
-  - "src/pages/**/*"
-  - "src/layouts/**/*"
-  - "src/styles/**/*"
+description: Geist Design System - Vercel Aesthetic
+globs: *.tsx,*.astro,*.css
 alwaysApply: true
 ---
 # Design System - Dziennik Wędkarski
 
-## Biblioteka komponentów
-
-Projekt wykorzystuje **Shadcn/ui** jako bibliotekę komponentów bazowych, **stylizowanych zgodnie z Material Design 3**.
-
-Szczegółowa dokumentacja: `.cursor/rules/ui-shadcn-helper.mdc`
-
-**Kluczowe zasady:**
-- Komponenty w folderze `src/components/ui`
-- Import przez alias `@/components/ui/...`
-- Instalacja nowych: `npx shadcn@latest add [nazwa]`
-- **Styl: dostosowany do Material Design 3** (nie domyślny styl Shadcn)
-
-**Dostępne komponenty:** Button, Card, Dialog, Sheet, Tabs, Input, Select, i więcej.
-
-### Adaptacja Shadcn/ui do Material Design 3
-
-Shadcn/ui to biblioteka komponentów bez własnego stylu - dostarcza funkcjonalność i strukturę, a wygląd definiujemy sami. **Wszystkie komponenty Shadcn muszą być stylizowane zgodnie z M3.**
-
-#### Zasady adaptacji:
-
-1. **Używaj komponentów Shadcn** - nie twórz własnych od zera
-2. **Nadpisuj style klasami Tailwind** - zgodnie z wytycznymi M3 w tym dokumencie
-3. **Zachowaj funkcjonalność Shadcn** - accessibility, keyboard navigation, focus management
-4. **Stosuj M3 shape, color, typography** - zaokrąglenia, kolory tonalne, type scale
-
-#### Przykłady adaptacji komponentów Shadcn → M3:
-
-```tsx
-// ❌ Domyślny Shadcn Button
-<Button>Kliknij</Button>
-
-// ✅ Flat Filled Button (bez cienia)
-<Button className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-  Kliknij
-</Button>
-
-// ✅ M3 Filled Tonal Button
-<Button className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80">
-  Kliknij
-</Button>
-```
-
-```tsx
-// ❌ Domyślna Shadcn Card
-<Card>
-  <CardContent>Treść</CardContent>
-</Card>
-
-// ✅ Flat Outlined Card (border zamiast shadow)
-<Card className="rounded-xl border border-border bg-card">
-  <CardContent className="p-4">Treść</CardContent>
-</Card>
-
-// ✅ Flat Filled Card
-<Card className="rounded-xl bg-muted border-0">
-  <CardContent className="p-4">Treść</CardContent>
-</Card>
-```
-
-```tsx
-// ❌ Domyślny Shadcn Dialog
-<Dialog>
-  <DialogContent>...</DialogContent>
-</Dialog>
-
-// ✅ M3 Dialog
-<Dialog>
-  <DialogContent className="rounded-3xl p-6 max-w-md">
-    ...
-  </DialogContent>
-</Dialog>
-```
-
-```tsx
-// ❌ Domyślny Shadcn Input
-<Input placeholder="Email" />
-
-// ✅ Flat Outlined Text Field (focus ring bez offsetu)
-<Input 
-  className="rounded-lg border-2 border-border bg-transparent px-4 py-3 
-             focus:border-primary focus:ring-2 focus:ring-primary/20 
-             transition-colors"
-  placeholder="Email" 
-/>
-```
-
-#### Mapowanie komponentów Shadcn → M3:
-
-| Shadcn Component | M3 Equivalent | Kluczowe zmiany |
-|------------------|---------------|-----------------|
-| `Button` | Filled/Tonal/Outlined/Text | `rounded-full`, state layers |
-| `Card` | Elevated/Filled/Outlined Card | `rounded-xl`, shadow/bg-muted/border |
-| `Dialog` | Dialog | `rounded-3xl`, większy padding |
-| `Sheet` | Bottom Sheet | `rounded-t-3xl` |
-| `Input` | Outlined/Filled Text Field | `rounded-lg`, floating label |
-| `Select` | Menu | `rounded-lg`, elevation |
-| `Tabs` | Tabs | Pill indicator, state layers |
-| `Switch` | Switch | `rounded-full`, track colors |
-| `Checkbox` | Checkbox | `rounded`, primary fill |
-| `Badge` | Badge | `rounded-full`, tonal colors |
-| `Avatar` | Avatar | `rounded-full` |
-| `DropdownMenu` | Menu | `rounded-lg`, elevation 3 |
-| `AlertDialog` | Dialog | `rounded-3xl` |
-| `Tooltip` | Plain Tooltip | `rounded-lg` |
-
-#### Kiedy NIE używać Shadcn:
-
-- **FAB** - brak w Shadcn, twórz własny zgodnie z M3
-- **Navigation Bar** - brak w Shadcn, twórz własny
-- **Chips** - brak w Shadcn, twórz własny
-- **Snackbar** - użyj Toast z Shadcn, dostosuj do M3
-
-**ZAWSZE sprawdzaj wytyczne M3 w tym dokumencie przed użyciem komponentu Shadcn!**
-
 ## Filozofia projektowa
 
-Projekt wykorzystuje **Material Design 3 - Flat Design Variant** jako podstawowy design system.
+Projekt wykorzystuje **Geist Design System** inspirowany estetyką Vercel.
 
 ### Kluczowe zasady:
 
-1. **Flat Design**
-   - **Brak cieni** na kartach i przyciskach - używaj border zamiast shadow
-   - Płaskie powierzchnie z wyraźnymi kolorami
-   - Hierarchia przez kolor i typografię, nie elevation
+1. **Dark-first**
+   - Ciemny motyw jako domyślny
+   - Klasa `dark` na `<html>`
+   - Kolory zoptymalizowane dla ciemnego tła
 
-2. **Mocne kolory**
-   - Nasycone, wyraziste kolory (wysoka chroma w oklch)
-   - Primary: teal `oklch(0.50 0.18 195)` - mocniejszy niż standardowy M3
-   - Wyraziste state layers: hover `bg-primary/15`, active `bg-primary/25`
+2. **Minimalizm**
+   - Proste, czyste interfejsy
+   - Brak zbędnych dekoracji
+   - Fokus na treść
 
-3. **Focus bez offsetu**
-   - Ring bezpośrednio na elemencie: `focus:ring-2 focus:ring-primary/20`
-   - Na inputach: `focus:border-primary focus:ring-2 focus:ring-primary/20`
-   - **Bez `ring-offset`** - focus ma być blisko elementu
-
-## Kolorystyka - Dynamic Color
-
-Używaj tokenów kolorów zdefiniowanych w `src/styles/global.css`:
-
-### Role kolorów M3
-
-| Token | Rola M3 | Użycie |
-|-------|---------|--------|
-| `primary` | Primary | Główny kolor akcji (teal - motyw wodny) |
-| `primary-foreground` | On Primary | Tekst/ikony na primary |
-| `secondary` | Secondary Container | Tło mniej ważnych elementów |
-| `secondary-foreground` | On Secondary Container | Tekst na secondary container |
-| `accent` | Tertiary | Kolor akcentowy, uzupełniający |
-| `muted` | Surface Container | Tła dla kart, inputów |
-| `muted-foreground` | On Surface Variant | Tekst pomocniczy |
-| `destructive` | Error | Błędy, akcje usuwania |
-| `background` | Surface | Główne tło aplikacji |
-| `foreground` | On Surface | Główny kolor tekstu |
-| `card` | Surface Container Low | Tło kart |
-| `border` | Outline Variant | Obramowania elementów |
-
-### Surface Tones (Poziomy powierzchni)
-
-```css
-/* Surface - główne tło */
-bg-background
-
-/* Surface Container - karty, dialogi */
-bg-card
-
-/* Surface Container High - podniesione elementy */
-bg-muted
-
-/* Primary Container - akcenty */
-bg-primary/12
-
-/* Secondary Container */
-bg-secondary
-```
-
-**UŻYWAJ:**
-- Kolorów tonalnych z odpowiednią przezroczystością
-- Tokenów CSS zamiast hardcodowanych wartości
-- Kontrastów zgodnych z WCAG AA
-
-**NIE UŻYWAJ:**
-- Hardcodowanych wartości hex/rgb
-- Kolorów spoza zdefiniowanej palety
-- Zbyt niskich kontrastów
-
-## Typografia - Material Type Scale
-
-**Font:** Roboto (domyślny font M3)
-
-```css
-font-family: "Roboto", system-ui, -apple-system, sans-serif;
-```
-
-Dla projektu webowego używamy Roboto lub system fonts z Roboto jako fallback.
-
-### Hierarchia typograficzna M3
-
-| Styl | Klasy Tailwind | Użycie |
-|------|----------------|--------|
-| Display Large | `text-6xl font-normal tracking-tight` | Wielkie tytuły hero |
-| Display Medium | `text-5xl font-normal tracking-tight` | Tytuły sekcji głównych |
-| Display Small | `text-4xl font-normal` | Mniejsze display |
-| Headline Large | `text-3xl font-normal` | Nagłówki główne |
-| Headline Medium | `text-2xl font-normal` | Nagłówki sekcji |
-| Headline Small | `text-xl font-normal` | Podtytuły |
-| Title Large | `text-xl font-medium` | Tytuły kart |
-| Title Medium | `text-base font-medium tracking-wide` | Tytuły elementów |
-| Title Small | `text-sm font-medium tracking-wide` | Małe tytuły |
-| Body Large | `text-base font-normal` | Główna treść |
-| Body Medium | `text-sm font-normal` | Treść pomocnicza |
-| Body Small | `text-xs font-normal` | Drobny tekst |
-| Label Large | `text-sm font-medium tracking-wide` | Etykiety przycisków |
-| Label Medium | `text-xs font-medium tracking-wide` | Etykiety inputów |
-| Label Small | `text-[11px] font-medium tracking-wide` | Mikro-etykiety |
-
-**Zasady M3:**
-- Display i Headline używają `font-normal` (400)
-- Title i Label używają `font-medium` (500)
-- Body używa `font-normal` (400)
-- `tracking-wide` dla mniejszych stylów Label i Title
-
-## Ikony - Material Symbols
-
-**Używaj Lucide React** (kompatybilny z Material Symbols):
-
-```tsx
-import { Fish, ChevronRight, Settings, X } from "lucide-react";
-
-// Rozmiary zgodne z M3
-<Fish className="h-5 w-5" />      // 20dp - domyślny
-<Fish className="h-6 w-6" />      // 24dp - standardowy
-<Fish className="h-10 w-10" />    // 40dp - duże ikony
-```
-
-**Logo aplikacji:** Ikona `Fish` z Lucide
-
-**Zasady M3 dla ikon:**
-- Preferuj styl Outlined (stroke) jako domyślny
-- Filled dla zaznaczonych/aktywnych stanów
-- Optical size dopasowany do kontekstu
-- Ikony w kolorze `on-surface` lub `primary`
-
-## Shape System - Zaokrąglenia
-
-Material Design 3 definiuje skalę kształtów:
-
-| Shape | Wartość | Klasa Tailwind | Użycie |
-|-------|---------|----------------|--------|
-| None | 0dp | `rounded-none` | Ostre krawędzie |
-| Extra Small | 4dp | `rounded` | Małe elementy |
-| Small | 8dp | `rounded-lg` | Inputy, chips |
-| Medium | 12dp | `rounded-xl` | Karty, dialogi |
-| Large | 16dp | `rounded-2xl` | Duże kontenery |
-| Extra Large | 28dp | `rounded-3xl` | Bottom sheets |
-| Full | 50% | `rounded-full` | FAB, avatary |
-
-### Komponenty i ich kształty
-
-```css
-/* Przyciski - Full rounded */
-rounded-full
-
-/* Karty - Medium */
-rounded-xl
-
-/* Inputy - Small */
-rounded-lg
-
-/* FAB - Full */
-rounded-full
-
-/* Dialogi - Extra Large */
-rounded-3xl
-
-/* Chips - Small */
-rounded-lg
-
-/* Navigation Bar - None (prostokątny) */
-rounded-none
-```
+3. **Subtelna głębia**
+   - Efekt `glow` na hover przycisków
+   - `gradient-border` dla wyróżnienia kart
+   - Animacje typu `glass` dla nawigacji
 
 ## Komponenty UI
 
-### Przyciski (M3 Button Styles)
+Komponenty w folderze `src/components/ui` - bazują na Radix UI + Tailwind.
+
+**Dostępne komponenty:**
+- `Button` - przyciski z wariantami
+- `Input` - pola tekstowe
+- `Label` - etykiety
+- `Avatar` - awatary użytkowników
+- `DropdownMenu` - menu rozwijane
+
+### Button - warianty
 
 ```tsx
-// Filled Button - główna akcja
-<Button className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm">
-  Zaloguj się
-</Button>
+// Primary - główna akcja (glow on hover)
+<Button>Zaloguj się</Button>
 
-// Filled Tonal - mniej ważna akcja
-<Button className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80">
-  Zapisz
-</Button>
+// Secondary - mniej ważna akcja
+<Button variant="secondary">Zapisz</Button>
 
-// Outlined Button
-<Button variant="outline" className="rounded-full border-border hover:bg-muted">
-  Anuluj
-</Button>
+// Outline - alternatywna
+<Button variant="outline">Anuluj</Button>
 
-// Text Button
-<Button variant="ghost" className="rounded-full hover:bg-primary/8">
-  Więcej
-</Button>
+// Ghost - subtelna
+<Button variant="ghost">Więcej</Button>
 
-// Elevated Button
-<Button className="rounded-full bg-card shadow-md hover:shadow-lg">
-  Eksportuj
-</Button>
+// Destructive - niebezpieczna akcja
+<Button variant="destructive">Usuń</Button>
 ```
 
-### Floating Action Button (FAB)
+### Rozmiary Button
 
 ```tsx
-// FAB - główna akcja na stronie
-<button className="fixed bottom-6 right-6 h-14 w-14 rounded-2xl bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center">
-  <Plus className="h-6 w-6" />
-</button>
-
-// Extended FAB
-<button className="fixed bottom-6 right-6 h-14 px-6 rounded-2xl bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-shadow flex items-center gap-2">
-  <Plus className="h-6 w-6" />
-  <span className="text-sm font-medium">Nowy połów</span>
-</button>
+<Button size="sm">Mały</Button>
+<Button size="default">Domyślny</Button>
+<Button size="lg">Duży</Button>
+<Button size="xl">Bardzo duży</Button>
+<Button size="icon">🔍</Button>
 ```
 
-### Inputy (M3 Text Fields)
+## Kolorystyka
+
+Używaj tokenów CSS zdefiniowanych w `src/styles/global.css`:
+
+| Token | Rola | Wartość (dark) |
+|-------|------|----------------|
+| `background` | Główne tło | `#000000` |
+| `foreground` | Główny tekst | `#ededed` |
+| `card` | Tło kart | `#0a0a0a` |
+| `primary` | Akcent (Vercel blue) | `#0070f3` |
+| `secondary` | Tło przycisków | `#1a1a1a` |
+| `muted` | Tło subtelne | `#1a1a1a` |
+| `muted-foreground` | Tekst pomocniczy | `#888888` |
+| `border` | Obramowania | `#333333` |
+| `destructive` | Błędy | `#ff4444` |
+| `success` | Sukces | `#50e3c2` |
+
+### Używaj klas Tailwind:
 
 ```tsx
-// Filled Text Field
-<div className="relative">
-  <input
-    className="w-full rounded-t-lg rounded-b-none bg-muted border-0 border-b-2 border-border 
-               px-4 pt-5 pb-2 text-base
-               focus:border-primary focus:bg-muted focus:outline-none
-               transition-colors peer"
-    placeholder=" "
-  />
-  <label className="absolute left-4 top-4 text-muted-foreground text-sm 
-                    peer-focus:top-1 peer-focus:text-xs peer-focus:text-primary
-                    peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-xs
-                    transition-all">
-    Email
-  </label>
-</div>
+// Tło
+bg-background  // główne
+bg-card        // karty
+bg-secondary   // przyciski
 
-// Outlined Text Field
-<div className="relative">
-  <input
-    className="w-full rounded-lg bg-transparent border-2 border-border 
-               px-4 pt-5 pb-2 text-base
-               focus:border-primary focus:outline-none
-               transition-colors peer"
-    placeholder=" "
-  />
-  <label className="absolute left-3 top-4 text-muted-foreground text-sm bg-background px-1
-                    peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary
-                    peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs
-                    transition-all">
-    Email
-  </label>
-</div>
+// Tekst
+text-foreground       // główny
+text-muted-foreground // pomocniczy
+text-primary          // akcent
+
+// Bordery
+border-border       // normalne
+border-border-hover // hover
 ```
 
-### Karty (M3 Cards)
+## Efekty specjalne
+
+### Glow (poświata)
 
 ```tsx
-// Elevated Card
-<div className="rounded-xl bg-card shadow-md p-4 hover:shadow-lg transition-shadow">
-  <h3 className="text-base font-medium">Tytuł</h3>
-  <p className="text-muted-foreground text-sm mt-1">Opis...</p>
-</div>
+// Hover glow na przyciskach
+<button className="hover:shadow-glow">...</button>
 
-// Filled Card
-<div className="rounded-xl bg-muted p-4">
-  <h3 className="text-base font-medium">Tytuł</h3>
-  <p className="text-muted-foreground text-sm mt-1">Opis...</p>
-</div>
+// Stały glow
+<div className="glow">...</div>
 
-// Outlined Card
-<div className="rounded-xl border border-border bg-card p-4">
-  <h3 className="text-base font-medium">Tytuł</h3>
-  <p className="text-muted-foreground text-sm mt-1">Opis...</p>
-</div>
+// Animowany glow
+<div className="glow-pulse">...</div>
 ```
 
-### Chips
+### Glass (szkło)
 
 ```tsx
-// Assist Chip
-<button className="inline-flex items-center gap-2 h-8 px-4 rounded-lg border border-border text-sm hover:bg-muted transition-colors">
-  <MapPin className="h-4 w-4" />
-  Lokalizacja
-</button>
-
-// Filter Chip
-<button className="inline-flex items-center gap-2 h-8 px-4 rounded-lg bg-secondary text-secondary-foreground text-sm">
-  <Check className="h-4 w-4" />
-  Aktywny
-</button>
-
-// Input Chip
-<span className="inline-flex items-center gap-1 h-8 pl-3 pr-1 rounded-lg bg-muted text-sm">
-  Szczupak
-  <button className="p-1 hover:bg-muted-foreground/20 rounded-full">
-    <X className="h-4 w-4" />
-  </button>
-</span>
+// Navbar z efektem blur
+<nav className="glass border-b">...</nav>
 ```
 
-### Listy
+### Gradient Border
 
-```css
-/* Lista z dividerami */
-divide-y divide-border
-
-/* List Item z ripple effect */
-hover:bg-primary/8 active:bg-primary/12 transition-colors
-
-/* Leading icon container */
-h-10 w-10 rounded-full bg-primary/12 flex items-center justify-center
+```tsx
+// Karta z gradientowym borderemo
+<div className="gradient-border">
+  <div className="bg-card rounded-lg border border-border p-6">
+    ...
+  </div>
+</div>
 ```
 
-## Flat Design - Brak cieni
+### Shine (połysk na hover)
 
-W tym projekcie stosujemy **flat design** - hierarchię budujemy przez:
-
-| Metoda | Klasy | Użycie |
-|--------|-------|--------|
-| Border | `border border-border` | Karty, kontenery |
-| Tło | `bg-muted`, `bg-primary/15` | Wyróżnienie sekcji |
-| Kolor | `text-primary`, `bg-primary` | Akcenty, CTA |
-| Typografia | `font-medium`, `text-lg` | Hierarchia treści |
-
-```css
-/* ❌ NIE UŻYWAJ cieni na kartach i przyciskach */
-shadow-sm, shadow-md
-
-/* ✅ UŻYWAJ border i kolor */
-border border-border bg-card
-bg-muted
-bg-primary/15
-
-/* Cienie tylko dla overlay (dialogi, dropdown) */
-shadow-lg  /* tylko dialogi, modals */
+```tsx
+<div className="shine">...</div>
 ```
 
-### Wyjątki - kiedy używać cieni:
+## Karty
 
-- **Dialogi/Modals** - `shadow-lg` dla oddzielenia od tła
-- **Dropdown menu** - `shadow-lg` dla depth
-- **Tooltip** - `shadow-md`
+### Geist Card (podstawowa)
 
-## Spacing i Layout
-
-### M3 Spacing Scale
-
-```css
-/* 4dp increment system */
-gap-1   /* 4dp */
-gap-2   /* 8dp */
-gap-3   /* 12dp */
-gap-4   /* 16dp */
-gap-5   /* 20dp */
-gap-6   /* 24dp */
-gap-8   /* 32dp */
-
-/* Padding komponentów */
-p-3     /* Compact */
-p-4     /* Standard */
-p-6     /* Comfortable */
-
-/* Marginesy sekcji */
-my-4    /* Tight */
-my-6    /* Standard */
-my-8    /* Relaxed */
+```tsx
+<div className="geist-card">
+  <h3>Tytuł</h3>
+  <p>Treść...</p>
+</div>
 ```
 
-### Canonical Layouts
+### Geist Card z glow
 
-```css
-/* Compact (< 600dp) - telefony */
-max-w-sm mx-auto px-4
-
-/* Medium (600-840dp) - tablety */
-max-w-2xl mx-auto px-6
-
-/* Expanded (> 840dp) - desktop */
-max-w-5xl mx-auto px-8
+```tsx
+<div className="geist-card-glow">
+  ...
+</div>
 ```
 
-## Motion - Animacje M3
+### Ręczna karta
 
-Material Design 3 definiuje trzy style motion:
-
-### Emphasized (dla ważnych przejść)
-```css
-/* Duration: 500ms, Easing: emphasized */
-transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]
+```tsx
+<div className="bg-card border border-border rounded-lg p-4 hover:bg-card-hover hover:border-border-hover transition-all">
+  ...
+</div>
 ```
 
-### Standard (dla większości UI)
+## Typografia
+
+**Font:** Geist (Sans + Mono)
+
 ```css
-/* Duration: 300ms, Easing: standard */
-transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+font-family: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
 ```
 
-### Expressive (dla wyrazistych interakcji)
+### Hierarchia
+
+| Styl | Klasy | Użycie |
+|------|-------|--------|
+| Heading 1 | `text-3xl font-semibold` | Tytuły główne |
+| Heading 2 | `text-xl font-semibold` | Nagłówki sekcji |
+| Heading 3 | `text-lg font-medium` | Podtytuły |
+| Body | `text-base` | Główna treść |
+| Small | `text-sm` | Tekst pomocniczy |
+| Tiny | `text-xs` | Etykiety |
+
+## Spacing
+
 ```css
-/* Duration: 400ms, Easing: expressive */
-transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]
+/* Padding kart */
+p-4   /* kompaktowe */
+p-6   /* standardowe */
+p-8   /* przestronne */
+
+/* Gap */
+gap-2  /* 8px - tight */
+gap-4  /* 16px - standard */
+gap-6  /* 24px - relaxed */
 ```
 
-### Typowe animacje M3
+## Animacje
+
+### Podstawowe przejścia
 
 ```css
-/* Fade in */
-animate-in fade-in duration-300
-
-/* Slide up (bottom sheets, dialogi) */
-animate-in slide-in-from-bottom-8 duration-300
-
-/* Scale (FAB, menu) */
-animate-in zoom-in-95 duration-200
-
-/* Ripple effect na przyciskach */
-active:scale-[0.98] transition-transform duration-100
-
-/* Hover state transition */
-hover:bg-primary/8 transition-colors duration-200
+transition-colors duration-200   /* kolory */
+transition-all duration-200      /* wszystko */
 ```
 
-### State Layers (mocniejsze dla flat design)
+### Scale na klik
 
 ```css
-/* Hover state - 10-15% opacity */
-hover:bg-primary/10
-hover:bg-primary/15  /* na jasnych elementach */
-
-/* Focus state - 15-20% opacity */
-focus:bg-primary/15
-
-/* Pressed/Active state - 20-25% opacity */
-active:bg-primary/20
-active:bg-primary/25  /* mocniejszy feedback */
-
-/* Icon containers */
-bg-primary/15  /* zamiast bg-primary/12 */
+active:scale-[0.97]  /* subtelne wciśnięcie */
 ```
 
 ## Dostępność
 
-- Kontrast kolorów: minimum 4.5:1 (WCAG AA) dla tekstu, 3:1 dla dużego tekstu
-- Touch targets: minimum 48x48dp
-- Focus states: `focus-visible:ring-2 focus-visible:ring-ring` **(bez offset!)**
-- Na inputach: `focus:border-primary focus:ring-2 focus:ring-primary/20`
-- State layers dla wszystkich interaktywnych elementów
-- Aria labels w języku polskim
-- Semantic HTML (`<main>`, `<nav>`, `<button>`)
-- `prefers-reduced-motion` support
-- `prefers-color-scheme` dla automatycznego dark mode
+- Kontrast: minimum 4.5:1 (WCAG AA)
+- Touch targets: minimum 44x44px
+- Focus: `focus-visible:ring-2 focus-visible:ring-ring`
+- Semantic HTML
+- `lang="pl"` na `<html>`
 
-## Język
+## Layout - Glass Navigation
 
-- Cały interfejs w języku polskim
-- `<html lang="pl">`
-- Komunikaty błędów po polsku
-- Etykiety formularzy po polsku
+### TopAppBar
 
-## Przykłady wzorców - Flat Design
-
-### Flat Card z interakcją
 ```tsx
-<div className="rounded-xl border border-border bg-card p-4 
-                hover:bg-primary/5 active:bg-primary/10 
-                transition-colors duration-150 cursor-pointer">
-  <div className="flex items-center gap-3">
-    <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center">
-      <Fish className="h-5 w-5 text-primary" />
+<header className="glass border-b h-14 fixed top-0 inset-x-0 z-50">
+  ...
+</header>
+```
+
+### BottomNavigation (mobile)
+
+```tsx
+<nav className="glass border-t h-16 fixed bottom-0 inset-x-0 z-50">
+  ...
+</nav>
+```
+
+### NavigationRail (desktop)
+
+```tsx
+<nav className="fixed left-0 top-14 bottom-0 w-16 bg-background border-r">
+  ...
+</nav>
+```
+
+## Przykłady wzorców
+
+### Empty State
+
+```tsx
+<div className="gradient-border">
+  <div className="bg-card rounded-lg border border-border p-12 text-center">
+    <div className="mx-auto h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center">
+      <Icon className="h-8 w-8 text-muted-foreground" />
     </div>
-    <div>
-      <h3 className="text-base font-medium">Szczupak</h3>
-      <p className="text-muted-foreground text-sm">2.5 kg • 65 cm</p>
+    <h3 className="mt-4 text-base font-medium">Brak danych</h3>
+    <p className="mt-2 text-sm text-muted-foreground">Opis...</p>
+    <Button className="mt-6">Akcja</Button>
+  </div>
+</div>
+```
+
+### List Item
+
+```tsx
+<div className="geist-card-glow shine cursor-pointer">
+  <div className="flex items-center gap-4">
+    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+      <Icon className="h-5 w-5" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <h4 className="text-sm font-medium truncate">Tytuł</h4>
+      <p className="text-xs text-muted-foreground">Szczegóły</p>
     </div>
   </div>
 </div>
 ```
 
-### Outlined Text Field (focus bez offsetu)
-```tsx
-<input
-  type="email"
-  className="w-full rounded-lg bg-transparent border-2 border-border 
-             px-4 py-3 text-base
-             focus:border-primary focus:outline-none 
-             focus:ring-2 focus:ring-primary/20
-             transition-colors duration-150"
-  placeholder="jan@example.com"
-/>
-```
+### FAB
 
-### Flat Filled Button
 ```tsx
-<Button className="h-10 rounded-full px-6 bg-primary text-primary-foreground 
-                   hover:bg-primary/90 active:scale-[0.98]
-                   transition-colors duration-150">
-  Zaloguj się
-</Button>
-```
-
-### FAB (wyjątek - może mieć cień)
-```tsx
-<button className="fixed bottom-6 right-6 h-14 px-6 rounded-2xl 
-                   bg-primary text-primary-foreground 
-                   shadow-lg hover:shadow-xl 
-                   active:scale-[0.98]
-                   transition-all duration-150 
-                   flex items-center gap-3">
-  <Plus className="h-6 w-6" />
-  <span className="text-sm font-medium tracking-wide">Nowy połów</span>
+<button className="fixed bottom-20 right-4 h-12 w-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary-hover hover:shadow-glow">
+  <Plus className="h-5 w-5" />
 </button>
 ```
 
-### Navigation Bar (Bottom)
-```tsx
-<nav className="fixed bottom-0 inset-x-0 h-20 bg-card border-t border-border 
-                flex items-center justify-around px-4">
-  <button className="flex flex-col items-center gap-1 p-2 rounded-2xl 
-                     hover:bg-primary/10 transition-colors">
-    <div className="h-8 w-16 rounded-full bg-primary/15 flex items-center justify-center">
-      <Home className="h-5 w-5 text-primary" />
-    </div>
-    <span className="text-xs font-medium text-primary">Główna</span>
-  </button>
-  <button className="flex flex-col items-center gap-1 p-2 rounded-2xl 
-                     hover:bg-primary/10 transition-colors">
-    <Fish className="h-5 w-5 text-muted-foreground" />
-    <span className="text-xs font-medium text-muted-foreground">Połowy</span>
-  </button>
-  <button className="flex flex-col items-center gap-1 p-2 rounded-2xl 
-                     hover:bg-primary/10 transition-colors">
-    <Settings className="h-5 w-5 text-muted-foreground" />
-    <span className="text-xs font-medium text-muted-foreground">Ustawienia</span>
-  </button>
-</nav>
-```
+## Język
+
+- Cały interfejs w języku polskim
+- `<html lang="pl">`
+- Komunikaty po polsku

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from "vitest";
 import { catchPhotoService } from "./catch-photo.service";
 import type { SupabaseClient } from "@/db/supabase.client";
@@ -482,4 +481,3 @@ describe("catchPhotoService", () => {
     });
   });
 });
-

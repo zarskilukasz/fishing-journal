@@ -5,18 +5,17 @@ interface LoginButtonProps {
   className?: string;
 }
 
+/**
+ * Login button for landing page - Geist style
+ * Primary button with glow effect on hover
+ */
 export function LoginButton({ authUrl = "/auth/login", className }: LoginButtonProps) {
   const handleClick = () => {
     window.location.href = authUrl;
   };
 
-  // Flat Filled Button - no shadow, vibrant color
   return (
-    <Button
-      size="lg"
-      onClick={handleClick}
-      className={`rounded-full px-8 transition-colors duration-150 active:scale-[0.98] ${className ?? ""}`}
-    >
+    <Button size="lg" onClick={handleClick} className={className}>
       Zaloguj się
     </Button>
   );

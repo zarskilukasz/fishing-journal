@@ -1,0 +1,52 @@
+---
+/**
+ * Main layout for the /app/* section.
+ * Provides navigation structure (TopAppBar, NavigationRail/BottomNav, FAB)
+ * and checks user authentication server-side.
+ */
+import Layout from "./Layout.astro";
+import { AppLayoutClient } from "@/components/layout/AppLayoutClient";
+import type { AppLayoutProps, UserSessionData } from "@/components/layout/navigation.types";
+
+type Props = AppLayoutProps;
+
+const { title, showBackButton = false, showFAB = false, fabLabel = "Nowy", fabHref } = Astro.props;
+
+// Get Supabase client from middleware
+const supabase = Astro.locals.supabase;
+
+// Check user authentication
+const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser();
+
+// Redirect to login if not authenticated
+if (error || !user) {
+  return Astro.redirect("/auth/login");
+}
+
+// Create user session data
+const userSession: UserSessionData = {
+  id: user.id,
+  email: user.email ?? "",
+};
+
+// Get current path for navigation highlighting
+const currentPath = Astro.url.pathname;
+---
+
+<Layout title={title}>
+  <AppLayoutClient
+    client:load
+    title={title}
+    currentPath={currentPath}
+    showBackButton={showBackButton}
+    showFAB={showFAB}
+    fabLabel={fabLabel}
+    fabHref={fabHref}
+    user={userSession}
+  >
+    <slot />
+  </AppLayoutClient>
+</Layout>

@@ -4,13 +4,13 @@ interface Props {
   class?: string;
 }
 
-const { text = "Twój osobisty asystent wędkarski", class: className } = Astro.props;
+const { text = "Twój osobisty asystent wędkarski", class: className } =
+  Astro.props;
 ---
 
-<!-- M3: Body Large typography, On Surface Variant color -->
 <p
   class:list={[
-    "max-w-md text-center text-base font-normal leading-relaxed text-muted-foreground",
+    "max-w-md text-center text-base text-muted-foreground leading-relaxed",
     className,
   ]}
 >

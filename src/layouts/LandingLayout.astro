@@ -20,7 +20,18 @@ const {
     <meta name="description" content={description} />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#ffffff" />
     <title>{title}</title>
+    <!-- Theme initialization script - runs before rendering to prevent flash -->
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+          document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#000000");
+        }
+      })();
+    </script>
   </head>
   <body class="min-h-screen overflow-x-hidden">
     <slot />

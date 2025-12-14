@@ -397,4 +397,3 @@ describe("catch-photo.schema", () => {
     });
   });
 });
-
