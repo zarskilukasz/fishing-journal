@@ -121,10 +121,10 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: fishing-journal
+          projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
+          wranglerVersion: "3"
 
   # ============================================================================
   # STATUS SUMMARY - Summary of deployment
