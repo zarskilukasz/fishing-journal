@@ -46,7 +46,7 @@ const DialogContent = React.forwardRef<
         "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
         "w-[calc(100%-2rem)] max-w-md",
         "bg-card border border-border rounded-lg shadow-lg",
-        "max-h-[90vh] overflow-hidden",
+        "max-h-[90vh] flex flex-col",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -72,7 +72,7 @@ const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogFooter.displayName = "DialogFooter";
 
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("p-4 sm:p-6 overflow-y-auto", className)} {...props} />
+  <div className={cn("p-4 sm:p-6 flex-1 min-h-0 overflow-y-auto", className)} {...props} />
 );
 DialogBody.displayName = "DialogBody";
 
