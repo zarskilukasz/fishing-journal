@@ -116,14 +116,12 @@ export function useCatchForm(options: UseCatchFormOptions): UseCatchFormReturn {
   const photoUpload = usePhotoUpload(existingCatch?.photo_path);
 
   // Fetch existing photo URL on mount (edit mode)
-  // Note: We use photoUpload.fetchDownloadUrl directly but don't include photoUpload
-  // in deps to avoid infinite loop (photoUpload object changes reference each render)
+  const { fetchDownloadUrl } = photoUpload;
   useEffect(() => {
     if (existingCatch?.id && existingCatch?.photo_path) {
-      photoUpload.fetchDownloadUrl(existingCatch.id);
+      fetchDownloadUrl(existingCatch.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingCatch?.id, existingCatch?.photo_path]);
+  }, [existingCatch?.id, existingCatch?.photo_path, fetchDownloadUrl]);
 
   // ---------------------------------------------------------------------------
   // Field setters

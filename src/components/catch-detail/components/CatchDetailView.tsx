@@ -28,7 +28,7 @@ function CatchDetailViewInner({ catchId }: CatchDetailViewProps) {
 
   // Handle successful edit
   const handleEditSuccess = useCallback(
-    async (updatedCatch: CatchDto) => {
+    async (_updatedCatch: CatchDto) => {
       // Invalidate catch query to refresh data
       await queryClient.invalidateQueries({ queryKey: ["catch", "detail", catchId] });
       await actions.refresh();

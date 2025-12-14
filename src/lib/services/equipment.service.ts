@@ -145,9 +145,18 @@ export class EquipmentService {
    * @returns Created equipment or error
    */
   async create(input: CreateEquipmentInput): Promise<ServiceResult<EquipmentDto>> {
+    // Get current user ID for RLS
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
+    if (!user) {
+      return { error: { code: "unauthorized", message: "Authentication required" } };
+    }
+
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .insert({ name: input.name })
+      .insert({ name: input.name, user_id: user.id })
       .select("id, user_id, name, deleted_at, created_at, updated_at")
       .single();
 

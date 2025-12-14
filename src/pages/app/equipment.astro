@@ -4,10 +4,20 @@
  * Users can manage their rods, lures, and groundbaits.
  */
 import AppLayout from "@/layouts/AppLayout.astro";
+import { EquipmentView, type EquipmentType } from "@/components/equipment";
+
+export const prerender = false;
+
+// Get tab from query parameter
+const tabParam = Astro.url.searchParams.get("tab");
+const validTabs: EquipmentType[] = ["rods", "lures", "groundbaits"];
+
+// Validate and default to "rods"
+const initialTab: EquipmentType = validTabs.includes(tabParam as EquipmentType)
+  ? (tabParam as EquipmentType)
+  : "rods";
 ---
 
 <AppLayout title="Sprzęt">
-  <div class="space-y-4">
-    <p class="text-muted-foreground">Zarządzanie sprzętem pojawi się tutaj.</p>
-  </div>
+  <EquipmentView client:load initialTab={initialTab} />
 </AppLayout>

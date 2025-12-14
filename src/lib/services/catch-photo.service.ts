@@ -205,13 +205,6 @@ export const catchPhotoService = {
     });
 
     if (error) {
-      console.error("[catch-photo.service] Storage upload error:", {
-        path,
-        bucket: CATCH_PHOTOS_BUCKET,
-        error: error.message,
-        statusCode: error.statusCode,
-        name: error.name,
-      });
       return {
         data: null,
         error: {
