@@ -2,6 +2,20 @@ import type { MiddlewareHandler } from "astro";
 import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 
 /**
+ * Gets environment variable from Cloudflare runtime or build-time env.
+ * Cloudflare Workers/Pages expose env vars through context.locals.runtime.env at runtime.
+ */
+function getEnvVar(context: Parameters<MiddlewareHandler>[0], key: string): string {
+  // Try Cloudflare runtime env first (for production on Cloudflare Pages)
+  const runtimeEnv = (context.locals as { runtime?: { env?: Record<string, string> } }).runtime?.env;
+  if (runtimeEnv?.[key]) {
+    return runtimeEnv[key];
+  }
+  // Fall back to build-time env (for local development)
+  return (import.meta.env as Record<string, string>)[key] ?? "";
+}
+
+/**
  * Astro middleware that initializes Supabase client for each request.
  * The client is stored in `context.locals.supabase` and handles cookie-based auth.
  *
@@ -9,7 +23,10 @@ import { createServerClient, parseCookieHeader } from "@supabase/ssr";
  * Token refresh is triggered before response to avoid late cookie updates.
  */
 export const onRequest: MiddlewareHandler = async (context, next) => {
-  context.locals.supabase = createServerClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_KEY, {
+  const supabaseUrl = getEnvVar(context, "SUPABASE_URL");
+  const supabaseKey = getEnvVar(context, "SUPABASE_KEY");
+
+  context.locals.supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return parseCookieHeader(context.request.headers.get("Cookie") ?? "");
