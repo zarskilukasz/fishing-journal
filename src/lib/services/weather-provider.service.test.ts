@@ -114,6 +114,29 @@ const mockHourlyResponse = [
   },
 ];
 
+const mockCurrentConditionsResponse = [
+  {
+    EpochTime: 1736935200,
+    WeatherText: "Partly sunny",
+    WeatherIcon: 3,
+    IsDayTime: true,
+    Temperature: {
+      Metric: { Value: 12.5, Unit: "C" },
+      Imperial: { Value: 54.5, Unit: "F" },
+    },
+    Pressure: {
+      Metric: { Value: 1015, Unit: "mb" },
+      Imperial: { Value: 29.97, Unit: "inHg" },
+    },
+    RelativeHumidity: 65,
+    Wind: {
+      Speed: { Metric: { Value: 15.0 }, Imperial: { Value: 9.3 } },
+      Direction: { Degrees: 180 },
+    },
+    CloudCover: 40,
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Tests: WeatherProviderService
 // ---------------------------------------------------------------------------
@@ -222,7 +245,13 @@ describe("WeatherProviderService", () => {
         json: () => Promise.resolve(mockLocationResponse),
       });
 
-      // Second call (hourly) returns 429
+      // Second call (current conditions) - will be called in parallel with hourly
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
+      });
+
+      // Third call (hourly) returns 429
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 429,
@@ -243,7 +272,13 @@ describe("WeatherProviderService", () => {
         json: () => Promise.resolve(mockLocationResponse),
       });
 
-      // Second call (hourly) returns 500
+      // Second call (current conditions) - will be called in parallel with hourly
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
+      });
+
+      // Third call (hourly) returns 500
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -282,6 +317,12 @@ describe("WeatherProviderService", () => {
         json: () => Promise.resolve(mockLocationResponse),
       });
 
+      // Current conditions API call (called in parallel with hourly)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
+      });
+
       // Hourly API call
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -301,6 +342,11 @@ describe("WeatherProviderService", () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockLocationResponse),
+      });
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
       });
 
       mockFetch.mockResolvedValueOnce({
@@ -331,6 +377,11 @@ describe("WeatherProviderService", () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockLocationResponse),
+      });
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
       });
 
       mockFetch.mockResolvedValueOnce({
@@ -369,6 +420,12 @@ describe("WeatherProviderService", () => {
         json: () => Promise.resolve(mockLocationResponse),
       });
 
+      // Current conditions mock (returns null for pressure in this case)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      });
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(minimalHourlyResponse),
@@ -401,6 +458,13 @@ describe("WeatherProviderService", () => {
         json: () => Promise.resolve(mockLocationResponse),
       });
 
+      // Current conditions
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
+      });
+
+      // Hourly
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
@@ -426,6 +490,13 @@ describe("WeatherProviderService", () => {
         json: () => Promise.resolve(mockLocationResponse),
       });
 
+      // Current conditions (second call)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCurrentConditionsResponse),
+      });
+
+      // Hourly (third call)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
@@ -433,8 +504,8 @@ describe("WeatherProviderService", () => {
 
       await service.fetchWeather(validParams);
 
-      // Second call should be hourly API
-      const hourlyCall = mockFetch.mock.calls[1][0] as string;
+      // Third call should be hourly API (index 2)
+      const hourlyCall = mockFetch.mock.calls[2][0] as string;
       expect(hourlyCall).toContain("forecasts/v1/hourly/12hour/274663");
       expect(hourlyCall).toContain("apikey=test-api-key");
       expect(hourlyCall).toContain("details=true");

@@ -719,37 +719,16 @@ describe("trip.schema", () => {
   // ---------------------------------------------------------------------------
 
   describe("closeTripSchema", () => {
-    it("accepts valid ended_at datetime", () => {
-      const result = closeTripSchema.safeParse({
-        ended_at: validDatetime,
-      });
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.ended_at).toBe(validDatetime);
-      }
-    });
-
-    it("rejects missing ended_at", () => {
+    it("accepts empty object (no ended_at required)", () => {
       const result = closeTripSchema.safeParse({});
 
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
 
-    it("rejects invalid ended_at format", () => {
-      const result = closeTripSchema.safeParse({
-        ended_at: invalidDatetime,
-      });
+    it("accepts undefined input", () => {
+      const result = closeTripSchema.safeParse(undefined);
 
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects null ended_at", () => {
-      const result = closeTripSchema.safeParse({
-        ended_at: null,
-      });
-
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
   });
 });

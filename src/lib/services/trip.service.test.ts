@@ -330,6 +330,16 @@ describe("tripService", () => {
 
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
+      // Add storage mock for signed URLs
+      (supabase as any).storage = {
+        from: vi.fn().mockReturnValue({
+          createSignedUrls: vi.fn().mockResolvedValue({
+            data: [{ path: "photos/catch-1.jpg", signedUrl: "https://signed-url.com/photo" }],
+            error: null,
+          }),
+        }),
+      };
+
       const result = await tripService.getById(supabase, validTripId, ["catches"]);
 
       expect(result.error).toBeNull();
@@ -645,37 +655,22 @@ describe("tripService", () => {
   });
 
   describe("close", () => {
-    it("closes trip with valid ended_at", async () => {
+    it("closes trip by setting status to closed", async () => {
       const supabase = createMockSupabase();
+      const tripsQuery = createMockQuery();
 
-      // Fetch query
-      const fetchQuery = createMockQuery();
-      fetchQuery.single.mockResolvedValue({
-        data: { started_at: "2025-01-15T10:00:00Z" },
-        error: null,
-      });
-
-      // Update query
-      const updateQuery = createMockQuery();
       const closedTrip = {
         ...mockTripRow,
         status: "closed",
-        ended_at: "2025-01-15T14:00:00Z",
       };
-      updateQuery.single.mockResolvedValue({ data: closedTrip, error: null });
+      tripsQuery.single.mockResolvedValue({ data: closedTrip, error: null });
 
-      let callCount = 0;
-      supabase.from = vi.fn(() => {
-        callCount++;
-        if (callCount === 1) return fetchQuery;
-        return updateQuery;
-      });
+      supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
-      const result = await tripService.close(supabase, validTripId, "2025-01-15T14:00:00Z");
+      const result = await tripService.close(supabase, validTripId);
 
       expect(result.error).toBeNull();
       expect(result.data?.status).toBe("closed");
-      expect(result.data?.ended_at).toBe("2025-01-15T14:00:00Z");
     });
 
     it("returns not_found when trip does not exist", async () => {
@@ -688,27 +683,10 @@ describe("tripService", () => {
 
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
-      const result = await tripService.close(supabase, "non-existent-id", "2025-01-15T14:00:00Z");
+      const result = await tripService.close(supabase, "non-existent-id");
 
       expect(result.data).toBeNull();
       expect(result.error?.code).toBe("not_found");
-    });
-
-    it("validates ended_at >= started_at", async () => {
-      const supabase = createMockSupabase();
-      const fetchQuery = createMockQuery();
-      fetchQuery.single.mockResolvedValue({
-        data: { started_at: "2025-01-15T10:00:00Z" },
-        error: null,
-      });
-
-      supabase.from = vi.fn().mockReturnValue(fetchQuery);
-
-      const result = await tripService.close(supabase, validTripId, "2025-01-15T09:00:00Z"); // Before started_at
-
-      expect(result.data).toBeNull();
-      expect(result.error?.code).toBe("validation_error");
-      expect(result.error?.message).toContain("ended_at");
     });
   });
 

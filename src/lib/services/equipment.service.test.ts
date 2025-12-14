@@ -338,6 +338,9 @@ describe("EquipmentService", () => {
 
       const supabase = {
         from: vi.fn().mockReturnValue(mockQuery),
+        auth: {
+          getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
+        },
       } as unknown as SupabaseClient;
 
       const service = new EquipmentService(supabase, "rods");
@@ -359,6 +362,9 @@ describe("EquipmentService", () => {
 
       const supabase = {
         from: vi.fn().mockReturnValue(mockQuery),
+        auth: {
+          getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
+        },
       } as unknown as SupabaseClient;
 
       const service = new EquipmentService(supabase, "rods");
@@ -379,13 +385,16 @@ describe("EquipmentService", () => {
 
       const supabase = {
         from: vi.fn().mockReturnValue(mockQuery),
+        auth: {
+          getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
+        },
       } as unknown as SupabaseClient;
 
       const service = new EquipmentService(supabase, "rods");
 
       await service.create({ name: "Test Rod" });
 
-      expect(mockQuery.insert).toHaveBeenCalledWith({ name: "Test Rod" });
+      expect(mockQuery.insert).toHaveBeenCalledWith({ name: "Test Rod", user_id: "user-1" });
     });
   });
 
