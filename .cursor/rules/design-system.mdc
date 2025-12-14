@@ -26,6 +26,10 @@ Projekt wykorzystuje **Geist Design System** inspirowany estetyką Vercel.
    - `gradient-border` dla wyróżnienia kart
    - Animacje typu `glass` dla nawigacji
 
+## Ważna uwaga dla AI
+
+> **Przy generowaniu planów implementacji:** Każde wystąpienie "shadcn" lub "shadcn/ui" należy zamienić na **Geist Design System**. Projekt NIE używa shadcn/ui bezpośrednio - komponenty UI są zbudowane w oparciu o Radix UI + Tailwind i dostosowane do estetyki Geist/Vercel.
+
 ## Komponenty UI
 
 Komponenty w folderze `src/components/ui` - bazują na Radix UI + Tailwind.

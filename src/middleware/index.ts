@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from "astro";
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
+import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 
 /**
  * Astro middleware that initializes Supabase client for each request.
