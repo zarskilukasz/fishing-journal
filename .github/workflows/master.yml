@@ -125,6 +125,7 @@ jobs:
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: "3"
+          branch: ${{ github.ref_name }}
 
   # ============================================================================
   # STATUS SUMMARY - Summary of deployment
