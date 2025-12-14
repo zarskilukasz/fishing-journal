@@ -1,0 +1,190 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ============================================================================
+  # LINT - Code quality check
+  # ============================================================================
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Run ESLint
+        run: pnpm lint
+
+  # ============================================================================
+  # UNIT TEST - Vitest with coverage
+  # ============================================================================
+  unit-test:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧪 Run unit tests with coverage
+        run: pnpm test:coverage
+
+      - name: 📊 Upload unit test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage
+          path: coverage/
+          retention-days: 7
+
+  # ============================================================================
+  # BUILD & DEPLOY - Build and deploy to Cloudflare Pages
+  # ============================================================================
+  deploy:
+    name: 🚀 Build & Deploy
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test]
+    environment: production
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      # Build-time environment variables
+      PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+      PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      ACCUWEATHER_API_KEY: ${{ secrets.ACCUWEATHER_API_KEY }}
+      PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.PUBLIC_GOOGLE_MAPS_API_KEY }}
+      PUBLIC_GOOGLE_MAPS_MAP_ID: ${{ secrets.PUBLIC_GOOGLE_MAPS_MAP_ID }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build application
+        run: pnpm build
+
+      - name: 🚀 Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+
+  # ============================================================================
+  # STATUS SUMMARY - Summary of deployment
+  # ============================================================================
+  status-summary:
+    name: 📋 Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test, deploy]
+    if: always()
+    steps:
+      - name: 📥 Download unit test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-coverage
+          path: coverage/
+        continue-on-error: true
+
+      - name: 📊 Parse coverage results
+        id: coverage
+        run: |
+          if [ -f "coverage/coverage-summary.json" ]; then
+            UNIT_LINES=$(jq -r '.total.lines.pct // 0' coverage/coverage-summary.json)
+            UNIT_BRANCHES=$(jq -r '.total.branches.pct // 0' coverage/coverage-summary.json)
+            UNIT_FUNCTIONS=$(jq -r '.total.functions.pct // 0' coverage/coverage-summary.json)
+            UNIT_STATEMENTS=$(jq -r '.total.statements.pct // 0' coverage/coverage-summary.json)
+          else
+            UNIT_LINES="N/A"
+            UNIT_BRANCHES="N/A"
+            UNIT_FUNCTIONS="N/A"
+            UNIT_STATEMENTS="N/A"
+          fi
+          
+          echo "unit_lines=$UNIT_LINES" >> $GITHUB_OUTPUT
+          echo "unit_branches=$UNIT_BRANCHES" >> $GITHUB_OUTPUT
+          echo "unit_functions=$UNIT_FUNCTIONS" >> $GITHUB_OUTPUT
+          echo "unit_statements=$UNIT_STATEMENTS" >> $GITHUB_OUTPUT
+
+      - name: 📋 Generate summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Job statuses
+          echo "### 📊 Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Unit Tests | ${{ needs.unit-test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚀 Deploy | ${{ needs.deploy.result == 'success' && '✅ Deployed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Coverage (if available)
+          echo "### 🧪 Unit Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lines | ${{ steps.coverage.outputs.unit_lines }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branches | ${{ steps.coverage.outputs.unit_branches }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Functions | ${{ steps.coverage.outputs.unit_functions }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Statements | ${{ steps.coverage.outputs.unit_statements }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Deployed to Cloudflare Pages • Run ID: ${{ github.run_id }}*" >> $GITHUB_STEP_SUMMARY
+

@@ -1,0 +1,16 @@
+# Cloudflare Workers / Pages configuration
+# https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "fishing-journal"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# For Cloudflare Pages (main configuration)
+pages_build_output_dir = "./dist"
+
+# Environment variables are managed in Cloudflare Dashboard
+# or via GitHub Actions secrets during deployment
+
+[observability]
+enabled = true
+
