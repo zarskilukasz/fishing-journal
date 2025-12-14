@@ -1,27 +1,39 @@
 /**
  * AddCatchFAB - Floating action button for adding a catch.
+ * Uses the same styling as the main FAB component.
  */
 import React from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useIsDesktop } from "@/components/hooks/useMediaQuery";
 import type { AddCatchFABProps } from "../types";
 
 /**
  * FAB for adding a new catch to the trip.
+ * Matches the size and style of the main FAB component.
  */
-export function AddCatchFAB({ tripId, disabled = false }: AddCatchFABProps) {
-  return (
-    <Button
-      asChild
-      size="lg"
-      className="fixed bottom-20 right-4 z-40 h-14 gap-2 rounded-xl shadow-lg hover:shadow-glow sm:bottom-6 sm:right-6"
-      disabled={disabled}
-    >
-      <a href={`/app/trips/${tripId}/catches/new`}>
-        <Plus className="h-5 w-5" aria-hidden="true" />
-        <span className="hidden sm:inline">Dodaj połów</span>
-      </a>
-    </Button>
-  );
-}
+export const AddCatchFAB = React.memo(function AddCatchFAB({ tripId, disabled = false }: AddCatchFABProps) {
+  const isExtended = useIsDesktop();
 
+  return (
+    <a
+      href={`/app/trips/${tripId}/catches/new`}
+      className={cn(
+        "fixed z-40 flex items-center justify-center",
+        "bg-primary text-primary-foreground",
+        "transition-all duration-200",
+        "hover:bg-primary-hover hover:shadow-glow",
+        "active:scale-[0.97]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        // Position and size (matching FAB.tsx)
+        isExtended ? "bottom-6 right-6 h-10 px-4 rounded-lg gap-2" : "bottom-20 right-4 h-12 w-12 rounded-xl",
+        disabled && "pointer-events-none opacity-50"
+      )}
+      aria-label={!isExtended ? "Dodaj połów" : undefined}
+      aria-disabled={disabled}
+    >
+      <Plus className={cn("shrink-0", isExtended ? "h-4 w-4" : "h-5 w-5")} aria-hidden="true" />
+      {isExtended && <span className="text-sm font-medium">Dodaj połów</span>}
+    </a>
+  );
+});

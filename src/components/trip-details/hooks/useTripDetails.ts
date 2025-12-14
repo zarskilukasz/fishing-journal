@@ -2,8 +2,8 @@
  * useTripDetails - Custom hook for trip details functionality.
  * Manages data fetching, close/delete actions, and computed values.
  */
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { tripQueryKeys } from "@/components/hooks";
 import type { TripGetResponseDto, ApiErrorResponse, CatchInTripDto } from "@/types";
 import type {

@@ -63,7 +63,7 @@
   /* Borders */
   --border: #eaeaea;
   --border-hover: #d4d4d4;
-  --input: #fafafa;
+  --input: #ffffff;
   --ring: #0070f3;
 
   /* Overlay */
@@ -125,7 +125,7 @@
 
   --border: #333333;
   --border-hover: #444444;
-  --input: #1a1a1a;
+  --input: #1f1f1f;
   --ring: #0070f3;
 
   --overlay: rgba(0, 0, 0, 0.8);
