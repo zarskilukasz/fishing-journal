@@ -5,6 +5,20 @@ import { createErrorResponse, createCreatedResponse } from "@/lib/api/error-resp
 import type { WeatherRefreshResponseDto } from "@/types";
 
 /**
+ * Gets environment variable from Cloudflare runtime or build-time env.
+ * Cloudflare Workers/Pages expose env vars through context.locals.runtime.env at runtime.
+ */
+function getEnvVar(locals: App.Locals, key: string): string {
+  // Try Cloudflare runtime env first (for production on Cloudflare Pages)
+  const runtimeEnv = (locals as unknown as { runtime?: { env?: Record<string, string> } }).runtime?.env;
+  if (runtimeEnv?.[key]) {
+    return runtimeEnv[key];
+  }
+  // Fall back to build-time env (for local development)
+  return (import.meta.env as Record<string, string>)[key] ?? "";
+}
+
+/**
  * POST /api/v1/trips/{tripId}/weather/refresh
  *
  * Fetches weather data from external API (AccuWeather) and creates a new snapshot.
@@ -69,13 +83,19 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
   const { tripId } = paramParseResult.data;
 
-  // 5. Execute service
-  const result = await weatherService.refreshWeather(supabase, tripId, bodyParseResult.data);
+  // 5. Build weather provider config from runtime env
+  const weatherConfig = {
+    apiKey: getEnvVar(locals, "ACCUWEATHER_API_KEY"),
+    baseUrl: getEnvVar(locals, "ACCUWEATHER_BASE_URL") || undefined,
+  };
+
+  // 6. Execute service
+  const result = await weatherService.refreshWeather(supabase, tripId, bodyParseResult.data, weatherConfig);
 
   if (result.error) {
     return createErrorResponse(result.error.code, result.error.message, result.error.httpStatus);
   }
 
-  // 6. Return 201 Created response
+  // 7. Return 201 Created response
   return createCreatedResponse<WeatherRefreshResponseDto>(result.data);
 };

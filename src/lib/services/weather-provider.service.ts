@@ -384,28 +384,22 @@ export class WeatherProviderService {
 }
 
 // ---------------------------------------------------------------------------
-// Singleton instance
+// Factory function
 // ---------------------------------------------------------------------------
 
-let instance: WeatherProviderService | null = null;
-
 /**
- * Gets the weather provider service singleton.
- * Reads configuration from environment variables.
+ * Creates a weather provider service with the given configuration.
+ * Use this when you have access to request context (Cloudflare runtime env).
  *
- * Environment variables:
- * - ACCUWEATHER_API_KEY: API key for AccuWeather
- * - ACCUWEATHER_BASE_URL: Base URL (optional, defaults to production)
+ * @param config - Optional partial configuration (apiKey, baseUrl, timeout)
+ * @returns Configured WeatherProviderService instance
  */
-export function getWeatherProvider(): WeatherProviderService {
-  if (!instance) {
-    instance = new WeatherProviderService({
-      apiKey: import.meta.env.ACCUWEATHER_API_KEY || "",
-      baseUrl: import.meta.env.ACCUWEATHER_BASE_URL || "https://dataservice.accuweather.com",
-      timeout: 10000,
-    });
-  }
-  return instance;
+export function createWeatherProvider(config?: Partial<WeatherProviderConfig>): WeatherProviderService {
+  return new WeatherProviderService({
+    apiKey: config?.apiKey ?? "",
+    baseUrl: config?.baseUrl ?? "https://dataservice.accuweather.com",
+    timeout: config?.timeout ?? 10000,
+  });
 }
 
 /**

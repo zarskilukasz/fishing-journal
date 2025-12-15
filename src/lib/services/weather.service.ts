@@ -19,7 +19,7 @@ import type {
 } from "@/lib/schemas/weather.schema";
 import { encodeCursor, decodeCursor } from "@/lib/api/pagination";
 import { mapSupabaseError, type MappedError } from "@/lib/errors/supabase-error-mapper";
-import { getWeatherProvider, mapWeatherProviderError } from "./weather-provider.service";
+import { createWeatherProvider, mapWeatherProviderError, type WeatherProviderConfig } from "./weather-provider.service";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -560,12 +560,14 @@ export const weatherService = {
    * @param supabase - Supabase client from context.locals
    * @param tripId - Trip UUID to fetch weather for
    * @param input - Validated refresh command input
+   * @param weatherConfig - Weather provider configuration (API key, base URL)
    * @returns Created snapshot ID
    */
   async refreshWeather(
     supabase: SupabaseClient,
     tripId: UUID,
-    input: WeatherRefreshCommandInput
+    input: WeatherRefreshCommandInput,
+    weatherConfig: Partial<WeatherProviderConfig>
   ): Promise<ServiceResult<WeatherRefreshResponseDto>> {
     // 1. Fetch trip with location data and dates
     const { data: trip, error: tripError } = await supabase
@@ -653,7 +655,7 @@ export const weatherService = {
     const clippedPeriodEnd = effectivePeriodEnd.toISOString();
 
     // 5. Fetch weather from external provider (using clipped period)
-    const weatherProvider = getWeatherProvider();
+    const weatherProvider = createWeatherProvider(weatherConfig);
     const weatherResult = await weatherProvider.fetchWeather({
       lat: trip.location_lat,
       lng: trip.location_lng,

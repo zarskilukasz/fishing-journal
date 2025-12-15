@@ -632,6 +632,9 @@ describe("weatherService", () => {
       started_at: new Date().toISOString(), // Recent trip
     };
 
+    // Mock weather provider config (no API key to simulate configuration error)
+    const mockWeatherConfig = { apiKey: "" };
+
     it("returns 404 when trip not found", async () => {
       const supabase = createMockSupabase();
       const tripsQuery = createMockQuery();
@@ -639,7 +642,7 @@ describe("weatherService", () => {
       tripsQuery.maybeSingle.mockResolvedValue({ data: null, error: null });
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
-      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput);
+      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput, mockWeatherConfig);
 
       expect(result.data).toBeNull();
       expect(result.error?.code).toBe("not_found");
@@ -661,7 +664,7 @@ describe("weatherService", () => {
       });
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
-      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput);
+      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput, mockWeatherConfig);
 
       expect(result.data).toBeNull();
       expect(result.error?.code).toBe("validation_error");
@@ -686,10 +689,15 @@ describe("weatherService", () => {
       });
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
-      const result = await weatherService.refreshWeather(supabase, validTripId, {
-        ...validRefreshInput,
-        force: false,
-      });
+      const result = await weatherService.refreshWeather(
+        supabase,
+        validTripId,
+        {
+          ...validRefreshInput,
+          force: false,
+        },
+        mockWeatherConfig
+      );
 
       expect(result.data).toBeNull();
       expect(result.error?.code).toBe("validation_error");
@@ -724,10 +732,15 @@ describe("weatherService", () => {
       // The weather provider is not mocked, so it will fail with bad_gateway
       // (due to missing API key / configuration_error mapped to bad_gateway)
       // Or validation_error if the weather data doesn't match the trip period
-      const result = await weatherService.refreshWeather(supabase, validTripId, {
-        ...validRefreshInput,
-        force: true,
-      });
+      const result = await weatherService.refreshWeather(
+        supabase,
+        validTripId,
+        {
+          ...validRefreshInput,
+          force: true,
+        },
+        mockWeatherConfig
+      );
 
       // Should get past the age validation. The error could be:
       // - bad_gateway: from weather provider failure
@@ -759,7 +772,7 @@ describe("weatherService", () => {
 
       // This test depends on weather provider mock - in real scenario
       // the provider error would come first before DB error
-      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput);
+      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput, mockWeatherConfig);
 
       // Either weather provider error or DB error
       expect(result.data).toBeNull();
@@ -776,7 +789,7 @@ describe("weatherService", () => {
       });
       supabase.from = vi.fn().mockReturnValue(tripsQuery);
 
-      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput);
+      const result = await weatherService.refreshWeather(supabase, validTripId, validRefreshInput, mockWeatherConfig);
 
       expect(result.data).toBeNull();
       expect(result.error).toBeDefined();
